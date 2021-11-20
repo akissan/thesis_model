@@ -1,6 +1,7 @@
 import fs from "fs";
+import path from "path";
 import { appData } from "./defaultPath";
-import { Note, NotesData } from "./notes";
+import { Category, Note, NotesData } from "./notes";
 import { log } from "./utils";
 
 const getNewNoteDataObject: () => NotesData = () => ({
@@ -35,8 +36,11 @@ export default class NoteDataManager {
   };
 
   writeNoteData = (filepath?: fs.PathLike) => {
-    const path = filepath ?? this.path;
-    fs.writeFileSync(path, JSON.stringify(this.data));
+    filepath ??= this.path;
+
+    const dirpath = path.dirname(filepath.toString());
+    if (!fs.existsSync(dirpath)) fs.mkdirSync(dirpath, { recursive: true });
+    fs.writeFileSync(filepath, JSON.stringify(this.data));
   };
 
   public addNewNoteToData = (note: Note, forceBehavior: boolean = false) => {
@@ -49,5 +53,11 @@ export default class NoteDataManager {
         throw new Error("There is no such a category");
       }
     }
+  };
+
+  public addNewCategoryToData = (category: Category) => {
+    if (this.data.categories[category.name])
+      throw new Error("Category already exists");
+    this.data.categories[category.name] = category;
   };
 }

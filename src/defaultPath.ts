@@ -7,4 +7,5 @@ const userAppData =
     ? process.env.HOME + "/Library/Preferences"
     : process.env.HOME + "/.local/share");
 
+export const appFolder = `${userAppData}/${appName}`;
 export const appData = `${userAppData}/${appName}/${defaultFileName}`;

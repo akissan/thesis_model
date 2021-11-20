@@ -35,12 +35,18 @@ class Notes {
             return note;
         };
         this.createNewNote = (args) => {
-            const { title, details, category } = args;
+            const { title, details, category, force } = args;
             if (!title)
                 throw new Error("Note title is not provided");
-            const note = new notes_1.Note({ title, details: args.d, category: args.c });
-            this._noteDataManager.addNewNoteToData(note, args.f);
+            const note = new notes_1.Note({ title, details, category });
+            this._noteDataManager.addNewNoteToData(note, force);
             (0, utils_1.log)("Noted!", note);
+        };
+        this.createNewCategory = (args) => {
+            if (!args.newCategory)
+                throw new Error("New category without a name? Wow...");
+            const newCategory = { name: args.newCategory, notes: [] };
+            this._noteDataManager.addNewCategoryToData(newCategory);
         };
         this._noteDataManager = new NoteDataManager_1.default(filepath);
         this.save = this._noteDataManager.writeNoteData;

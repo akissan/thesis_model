@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const defaultPath_1 = require("./defaultPath");
 const utils_1 = require("./utils");
 const getNewNoteDataObject = () => ({
@@ -24,8 +25,11 @@ class NoteDataManager {
             return notesData;
         };
         this.writeNoteData = (filepath) => {
-            const path = filepath !== null && filepath !== void 0 ? filepath : this.path;
-            fs_1.default.writeFileSync(path, JSON.stringify(this.data));
+            filepath !== null && filepath !== void 0 ? filepath : (filepath = this.path);
+            const dirpath = path_1.default.dirname(filepath.toString());
+            if (!fs_1.default.existsSync(dirpath))
+                fs_1.default.mkdirSync(dirpath, { recursive: true });
+            fs_1.default.writeFileSync(filepath, JSON.stringify(this.data));
         };
         this.addNewNoteToData = (note, forceBehavior = false) => {
             this.data.notes[note.id] = note;
@@ -37,6 +41,11 @@ class NoteDataManager {
                     throw new Error("There is no such a category");
                 }
             }
+        };
+        this.addNewCategoryToData = (category) => {
+            if (this.data.categories[category.name])
+                throw new Error("Category already exists");
+            this.data.categories[category.name] = category;
         };
         this.path = filepath !== null && filepath !== void 0 ? filepath : defaultPath_1.appData;
         this.data = this.getNoteData();

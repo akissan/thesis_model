@@ -3,7 +3,7 @@ import fs from "fs";
 import { Argv } from ".";
 import { appData } from "./defaultPath";
 import NoteDataManager from "./NoteDataManager";
-import { Note, NoteID, NotesData } from "./notes";
+import { Category, Note, NoteID, NotesData } from "./notes";
 import { log } from "./utils";
 
 export class Notes {
@@ -42,11 +42,19 @@ export class Notes {
   };
 
   public createNewNote = (args: Argv) => {
-    const { title, details, category } = args;
+    const { title, details, category, force } = args;
     if (!title) throw new Error("Note title is not provided");
 
-    const note = new Note({ title, details: args.d, category: args.c });
-    this._noteDataManager.addNewNoteToData(note, args.f);
+    const note = new Note({ title, details, category });
+    this._noteDataManager.addNewNoteToData(note, force);
     log("Noted!", note);
+  };
+
+  public createNewCategory = (args: Argv) => {
+    if (!args.newCategory)
+      throw new Error("New category without a name? Wow...");
+
+    const newCategory: Category = { name: args.newCategory, notes: [] };
+    this._noteDataManager.addNewCategoryToData(newCategory);
   };
 }

@@ -8,6 +8,10 @@ export type Argv = typeof argv;
 
 const nm = new Notes(argv.filepath);
 
+if (argv.newCategory) {
+  nm.createNewCategory(argv);
+}
+
 if (argv.title) {
   nm.createNewNote(argv);
 }
