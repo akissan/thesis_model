@@ -12,6 +12,9 @@ lerna-debug.log*
 # Test data
 dummyData/
 
+# Build
+build/
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -26,7 +29,7 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
-*.lcov
+*.lcovgit p
 
 # nyc test coverage
 .nyc_output
