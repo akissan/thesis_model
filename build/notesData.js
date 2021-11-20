@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Notes = void 0;
 const chalk_1 = __importDefault(require("chalk"));
-const fs_1 = __importDefault(require("fs"));
+const NoteDataManager_1 = __importDefault(require("./NoteDataManager"));
 const notes_1 = require("./notes");
 const utils_1 = require("./utils");
 class Notes {
@@ -42,34 +42,8 @@ class Notes {
             this._noteDataManager.addNewNoteToData(note, args.f);
             (0, utils_1.log)("Noted!", note);
         };
-        this._noteDataManager = new NoteDataManager(filepath);
+        this._noteDataManager = new NoteDataManager_1.default(filepath);
         this.save = this._noteDataManager.writeNoteData;
     }
 }
 exports.Notes = Notes;
-class NoteDataManager {
-    constructor(filepath) {
-        this.getNoteData = (filepath) => {
-            let rawData = fs_1.default.readFileSync(filepath !== null && filepath !== void 0 ? filepath : this.path);
-            let notesData = JSON.parse(rawData.toString());
-            return notesData;
-        };
-        this.writeNoteData = (filepath) => {
-            fs_1.default.writeFileSync(filepath !== null && filepath !== void 0 ? filepath : this.path, JSON.stringify(this.data));
-        };
-        this.addNewNoteToData = (note, forceBehavior = false) => {
-            this.data.notes[note.id] = note;
-            if (note.category) {
-                if (this.data.categories[note.category]) {
-                    this.data.categories[note.category].notes.push(note.id);
-                }
-                else {
-                    throw new Error("There is no such a category");
-                }
-            }
-        };
-        this.path = filepath !== null && filepath !== void 0 ? filepath : "./notes.json";
-        this.data = this.getNoteData();
-        (0, utils_1.log)("DATA: ", this.data);
-    }
-}

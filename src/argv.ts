@@ -1,4 +1,4 @@
-import yargs, { boolean } from "yargs";
+import yargs from "yargs";
 import { log } from "./utils";
 
 export const argvOptions = {

@@ -1,1 +1,24 @@
-{"categories":{"factorio":{"name":"factorio","notes":["56686f","fd2286"]},"omegalul":{"name":"omegalul","notes":["4fb822"]}},"notes":{"56686f":{"title":"wow","id":"56686f"},"fd2286":{"title":"wow","id":"fd2286","category":"factorion"},"8bd40b":{"title":"wow","details":"","id":"8bd40b","category":""},"4fb822":{"title":"wow","details":"","id":"4fb822","category":""},"085695":{"title":"wow33","details":"","id":"085695","category":""},"ff913e":{"title":"factorio","details":"","id":"ff913e","category":""}}}
+{
+  "categories": {
+    "factorio": { "name": "factorio", "notes": ["56686f", "fd2286"] },
+    "omegalul": { "name": "omegalul", "notes": ["4fb822"] }
+  },
+  "notes": {
+    "56686f": { "title": "wow", "id": "56686f" },
+    "fd2286": { "title": "wow", "id": "fd2286", "category": "factorion" },
+    "8bd40b": { "title": "wow", "details": "", "id": "8bd40b", "category": "" },
+    "4fb822": { "title": "wow", "details": "", "id": "4fb822", "category": "" },
+    "085695": {
+      "title": "wow33",
+      "details": "",
+      "id": "085695",
+      "category": ""
+    },
+    "ff913e": {
+      "title": "factorio",
+      "details": "",
+      "id": "ff913e",
+      "category": ""
+    }
+  }
+}

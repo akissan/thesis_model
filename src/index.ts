@@ -1,9 +1,6 @@
 #!/usr/bin/env node
-import { notStrictEqual } from "assert";
-import chalk from "chalk";
 import { argvOptions, initArgs } from "./argv";
-import { Note, NotesData } from "./notes";
-import { Notes } from "./tasksData";
+import { Notes } from "./notesData";
 import { log } from "./utils";
 
 const argv = initArgs(argvOptions);
