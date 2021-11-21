@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { argvOptions, initArgs } from "./argv";
 import { Notes } from "./notesData";
 import { log } from "./utils";

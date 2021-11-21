@@ -1,11 +1,10 @@
+import chalk from "chalk";
 import { Note } from "./notes";
 
-const spacer = " ".padStart(16);
+const spacer = " ".padStart(2);
 
 export const printNote = (note: Note) => {
-  console.log("wtf");
-  return `${spacer}${note.title.padEnd(32)} [${note.category}]\r\n${spacer}${
-    note.details
-  }`;
-  //   return note;
+  return `${spacer}${note.title.padEnd(32)} [ ${chalk.blue(
+    note.category
+  )} ]\r\n${spacer}${chalk.yellowBright(note.details)}`;
 };

@@ -1,5 +1,6 @@
 {
-  "include": ["./types/global.d.ts"],
+  // "include": ["./src/types/global.d.ts", "./src/*"],
+  "compileOnSave": true,
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
