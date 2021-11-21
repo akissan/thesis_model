@@ -20,10 +20,10 @@ export type NotesData = {
 
 export class Note {
   public title: string = "";
-  public details?: string = "";
-  public id: string = "0";
-  public category?: string = "";
+  public details?: string;
+  public category?: string;
 
+  public id: string = "0";
   constructor(noteInitData: NoteT) {
     Object.assign(this, noteInitData);
     this.id = uid();

@@ -16,7 +16,7 @@ if (argv.title) {
   nm.createNewNote(argv);
 }
 
-if (!argv.title || argv.list) {
+if ((!argv.title && !argv.newCategory) || argv.list) {
   log(nm.getNotes(argv));
 }
 

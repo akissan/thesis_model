@@ -4,6 +4,7 @@ import { Argv } from ".";
 import { appData } from "./defaultPath";
 import NoteDataManager from "./NoteDataManager";
 import { Category, Note, NoteID, NotesData } from "./notes";
+import { printNote } from "./prettyPrint";
 import { log } from "./utils";
 
 export class Notes {
@@ -28,7 +29,7 @@ export class Notes {
 
     if (id) {
       log("Note with id [ " + chalk.magenta(id) + " ]");
-      return this.getNote(id);
+      return printNote(this.getNote(id));
     }
 
     log("Dumping everything: ");

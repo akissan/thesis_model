@@ -17,7 +17,7 @@ export default class NoteDataManager {
   constructor(filepath?: fs.PathLike) {
     this.path = filepath ?? appData;
     this.data = this.getNoteData();
-    log("DATA: ", this.data);
+    if (global.VERBOSE) log("DATA: ", this.data);
   }
 
   getNoteData = (filepath?: fs.PathLike) => {

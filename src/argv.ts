@@ -1,19 +1,74 @@
-import yargs from "yargs";
+import yargs, { Argv } from "yargs";
+// import { Argv } from ".";
 import { log } from "./utils";
 
-export const argvOptions = {
-  title: { type: "string", alias: "n" },
-  category: { type: "string", alias: "c", default: "" },
-  details: { type: "string", alias: "d", default: "" },
-  force: { type: "boolean", alias: "f", default: false },
-  filepath: { type: "string", alias: "p" },
-  list: { type: "string", alias: "l" },
-  id: { type: "string", alias: "i" },
-  newCategory: { type: "string", alias: "C" },
-} as const;
+declare global {
+  namespace NodeJS {
+    interface Global {
+      VERBOSE: boolean;
+    }
+  }
+}
+
+namespace NodeJS {
+  interface Global {
+    VERBOSE: boolean;
+  }
+}
+
+export const argvOptions =
+  // : Record<string, yargs.Options>
+  {
+    title: {
+      type: "string",
+      alias: "n",
+      describe: "New note title",
+      group: "New note",
+    },
+    category: {
+      type: "string",
+      alias: "c",
+      describe: "Specify a category",
+      implies: ["n"],
+      group: "New note",
+    },
+    details: {
+      type: "string",
+      alias: "d",
+      describe: "Specify a details",
+      implies: ["n"],
+      group: "New note",
+    },
+    list: {
+      type: "string",
+      alias: "l",
+      describe: "Get notes in category",
+      group: "Output",
+    },
+    id: {
+      type: "string",
+      alias: "i",
+      describe: "Get note with ID",
+      group: "Output",
+    },
+    newCategory: {
+      type: "string",
+      alias: "C",
+      describe: "New category",
+      group: "New category",
+    },
+    force: { type: "boolean", alias: "f", default: false },
+    filepath: { type: "string", alias: "p", describe: "Note file" },
+    verbose: { type: "boolean", alias: "v", default: false },
+  } as const;
 
 export const initArgs = (options: typeof argvOptions) => {
-  const args = yargs(process.argv.slice(2)).options(options).parseSync();
-  log("ARGS: ", args);
+  const args = yargs(process.argv.slice(2))
+    .usage("$0 <NoteID>")
+    .options(options)
+    .parseSync();
+
+  global.VERBOSE = args.verbose;
+  if (global.VERBOSE) log("ARGS: ", args);
   return args;
 };
