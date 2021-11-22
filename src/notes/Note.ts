@@ -1,4 +1,4 @@
-import { uid } from "./utils";
+import { uid } from "../util/utils";
 
 export type NoteID = string | number;
 
@@ -7,7 +7,7 @@ export type Category = {
   notes: NoteID[];
 };
 
-export type NoteT = {
+export type NoteInitData = {
   title: string;
   details?: string;
   category?: string;
@@ -24,7 +24,7 @@ export class Note {
   public category?: string;
 
   public id: string = "0";
-  constructor(noteInitData: NoteT) {
+  constructor(noteInitData: NoteInitData) {
     Object.assign(this, noteInitData);
     this.id = uid();
   }

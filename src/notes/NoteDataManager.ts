@@ -1,13 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { appData } from "./defaultPath";
-import { Category, Note, NotesData } from "./notes";
-import { log } from "./utils";
-
-const getNewNoteDataObject: () => NotesData = () => ({
-  categories: {},
-  notes: {},
-});
+import { appData } from "../util/defaultPath";
+import { Category, Note, NotesData } from "./Note";
+import { log } from "../util/utils";
 
 export default class NoteDataManager {
   public data: NotesData;
@@ -20,6 +15,11 @@ export default class NoteDataManager {
     if (global.VERBOSE) log("DATA: ", this.data);
   }
 
+  public static getNewNoteDataObject: () => NotesData = () => ({
+    categories: {},
+    notes: {},
+  });
+
   getNoteData = (filepath?: fs.PathLike) => {
     const path = filepath ?? this.path;
 
@@ -27,7 +27,7 @@ export default class NoteDataManager {
 
     if (!isExists) {
       console.warn("No NoteFile on this path, creating new");
-      return getNewNoteDataObject();
+      return NoteDataManager.getNewNoteDataObject();
     }
 
     let rawData = fs.readFileSync(path);

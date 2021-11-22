@@ -1,10 +1,10 @@
 import chalk from "chalk";
 import fs from "fs";
 import { Argv } from ".";
-import { appData } from "./defaultPath";
+// import { appData } from "./defaultPath";
 import NoteDataManager from "./NoteDataManager";
-import { Category, Note, NoteID, NotesData } from "./notes";
-import { printNote } from "./prettyPrint";
+import { Category, Note, NoteID } from "./notes";
+import { printEverything, printNote, printOneCategory } from "./prettyPrint";
 import { log } from "./utils";
 
 export class Notes {
@@ -20,31 +20,13 @@ export class Notes {
     const category = args.list;
     const id = args.id ?? args._[0];
 
-    const printOneCategory = (categoryData: Category) => {
-      return categoryData.notes
-        .map((noteId) =>
-          printNote(this.getNote(noteId), {
-            printCategory: false,
-            printOneLine: true,
-            descriptionLimit: 64,
-            titlePadding: 2,
-            printDescription: args.D,
-            printID: !args.noID,
-          })
-        )
-        .join("\r\n");
-    };
-
     if (category) {
       log(
-        chalk.greenBright("Notes in category") +
-          " [ " +
-          chalk.blue(category) +
-          " ]"
+        `${chalk.greenBright("Notes in category")} [ ${chalk.blue(category)}  ]`
       );
       const categoryData = this._noteDataManager.data.categories[category];
       if (!categoryData) throw new Error("Seems lika a wrong category...");
-      return printOneCategory(categoryData);
+      return printOneCategory(categoryData, this.getNote, args);
     }
 
     if (id) {
@@ -53,29 +35,7 @@ export class Notes {
     }
 
     log(chalk.greenBright("All notes:"));
-    const printedCategories = [];
-    let res = "";
-    for (const category in this._noteDataManager.data.categories) {
-      const categoryData = this._noteDataManager.data.categories[category];
-      res += chalk.blue(category) + "\r\n";
-      res += printOneCategory(categoryData) + "\r\n";
-      printedCategories.push(category);
-    }
-    const emptyCategory: Category = { name: "No category", notes: [] };
-    for (const noteID in this._noteDataManager.data.notes) {
-      const note = this._noteDataManager.data.notes[noteID];
-      if (!note.category || !printedCategories.includes(note.category)) {
-        emptyCategory.notes.push(noteID);
-      }
-    }
-
-    if (emptyCategory.notes.length > 0) {
-      res += chalk.blue(emptyCategory.name) + "\r\n";
-      res += printOneCategory(emptyCategory);
-    }
-
-    // return this._noteDataManager.data;
-    return res;
+    printEverything(this._noteDataManager.data, this.getNote, args);
   };
 
   public getNote = (id: NoteID) => {
