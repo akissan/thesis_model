@@ -1,11 +1,12 @@
 import chalk from "chalk";
 import fs from "fs";
-import { Argv } from ".";
+import { Argv } from "../index";
 // import { appData } from "./defaultPath";
 import NoteDataManager from "./NoteDataManager";
-import { Category, Note, NoteID } from "./notes";
-import { printEverything, printNote, printOneCategory } from "./prettyPrint";
-import { log } from "../util/utils;
+import { Category, Note, NoteID } from "./Note";
+
+import { printEverything, printNote, printOneCategory } from "../prettyPrint";
+import { log } from "../util/utils";
 
 export class Notes {
   private _noteDataManager: NoteDataManager;
