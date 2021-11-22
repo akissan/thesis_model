@@ -50,7 +50,9 @@ export default class NoteDataManager {
       if (this.data.categories[note.category]) {
         this.data.categories[note.category].notes.push(note.id);
       } else {
-        throw new Error("There is no such a category");
+        if (forceBehavior) {
+          this.addNewCategoryToData({ name: note.category, notes: [note.id] });
+        } else throw new Error("There is no such a category");
       }
     }
   };
