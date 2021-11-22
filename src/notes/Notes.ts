@@ -51,7 +51,7 @@ export class Notes {
 
     const note = new Note({ title, details, category });
     this._noteDataManager.addNewNoteToData(note, force);
-    log("Noted!", note);
+    log(chalk.green("Noted!"), !global.VERBOSE ? chalk.magenta(note.id) : note);
   };
 
   public createNewCategory = (args: Argv) => {
