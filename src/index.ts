@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { argvOptions, initArgs } from "./argv";
-import { Notes } from "./notesData";
-import { log } from "./utils";
+import { argvOptions, initArgs } from "./util/argv";
+import { Notes } from "./notes/Notes";
+import { log } from "./util/utils";
 
 const argv = initArgs(argvOptions);
 export type Argv = typeof argv;

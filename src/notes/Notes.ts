@@ -5,7 +5,7 @@ import { Argv } from ".";
 import NoteDataManager from "./NoteDataManager";
 import { Category, Note, NoteID } from "./notes";
 import { printEverything, printNote, printOneCategory } from "./prettyPrint";
-import { log } from "./utils";
+import { log } from "../util/utils;
 
 export class Notes {
   private _noteDataManager: NoteDataManager;
@@ -35,7 +35,7 @@ export class Notes {
     }
 
     log(chalk.greenBright("All notes:"));
-    printEverything(this._noteDataManager.data, this.getNote, args);
+    return printEverything(this._noteDataManager.data, this.getNote, args);
   };
 
   public getNote = (id: NoteID) => {
