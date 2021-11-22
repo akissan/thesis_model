@@ -57,6 +57,18 @@ export const argvOptions =
       describe: "New category",
       group: "New category",
     },
+    D: {
+      type: "boolean",
+      describe: "Print description",
+      group: "Print options",
+      default: false,
+    },
+    noID: {
+      type: "boolean",
+      describe: "Do not print IDs",
+      group: "Print options",
+      default: false,
+    },
     force: { type: "boolean", alias: "f", default: false },
     filepath: { type: "string", alias: "p", describe: "Note file" },
     verbose: { type: "boolean", alias: "v", default: false },
