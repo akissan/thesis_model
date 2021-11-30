@@ -5,7 +5,7 @@ import { log } from "./utils";
 declare global {
   namespace NodeJS {
     interface Global {
-      VERBOSE: boolean;
+      // VERBOSE: boolean;
     }
   }
 }
@@ -80,7 +80,8 @@ export const initArgs = (options: typeof argvOptions) => {
     .options(options)
     .parseSync();
 
-  global.VERBOSE = args.verbose;
+  // global.VERBOSE = args.verbose;
+  global.VERBOSE = true;
   if (global.VERBOSE) log("ARGS: ", args);
   return args;
 };
