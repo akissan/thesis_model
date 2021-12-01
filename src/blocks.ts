@@ -9,62 +9,79 @@ export type BlockID = string;
 
 export type BlockStatus = "idle" | "processing";
 
-export class HandlerBlock {
+type BaseProps = {
+  tables: GlobalTables;
+};
+
+export class BaseBlock {
   currentOccupant: UnitID | null = null;
-  inputQueue: QueueID;
-  time: number = 0;
   status: BlockStatus = "idle";
-  nextBlockID: any;
   id: BlockID;
   tables: GlobalTables;
+  assignProcess?: Function;
+  onIdle?: Function;
+
+  constructor({ tables }: BaseProps) {
+    this.id = uid();
+    this.tables = tables;
+    this.tables.blocks[this.id] = this;
+  }
+
+  step = () => {
+    if (this.status === "idle") {
+      this.onIdle?.();
+    }
+  };
+
+  occupe(unitID: UnitID) {
+    this.currentOccupant = unitID;
+    this.status = "processing";
+
+    this.assignProcess?.();
+  }
+}
+
+export class HandlerBlock extends BaseBlock {
+  inputQueue: QueueID;
+  //   time: number = 0;
+  //   nextBlockID: any;
 
   terminatedUnits: UnitID[];
-  //   process:
-  //     | null
-  //     | "parsing"
-  //     | "cache_reading"
-  //     | "response_crafting"
-  //     | "response_receiving";
 
   constructor({
     queue,
     tables,
     terminatedUnits,
-  }: {
+  }: BaseProps & {
     queue: HandlerBlock["inputQueue"];
-    tables: GlobalTables;
     terminatedUnits: UnitID[];
   }) {
+    super({ tables });
     this.inputQueue = queue;
-    this.id = uid();
-    this.tables = tables;
-    this.tables.blocks[this.id] = this;
     this.terminatedUnits = terminatedUnits;
   }
 
-  occupe(unitID: UnitID) {
-    // this.tables.units[unitID].process = "processing";
-    this.currentOccupant = unitID;
-    this.status = "processing";
+  assignProcess = () => {
+    if (
+      this.currentOccupant &&
+      this.tables.units[this.currentOccupant].requestState === "connected"
+    ) {
+      new SendingProcess({
+        unit: this.currentOccupant,
+        tables: this.tables,
+        terminatedUnits: this.terminatedUnits,
+      });
+    }
+  };
 
-    new SendingProcess({
-      unit: unitID,
-      tables: this.tables,
-      terminatedUnits: this.terminatedUnits,
-    });
-  }
+  onIdle = () => {
+    const inputQueue = this.tables.queues[this.inputQueue];
+    const freeUnitID = inputQueue.pop();
 
-  step = () => {
-    if (this.status === "idle") {
-      const inputQueue = this.tables.queues[this.inputQueue];
-      const freeUnitID = inputQueue.pop();
-
-      if (freeUnitID) {
-        console.log(freeUnitID);
-        this.occupe(freeUnitID);
-      }
+    if (freeUnitID) {
+      this.occupe(freeUnitID);
     }
   };
 }
 
-export type Block = HandlerBlock;
+export type Block = BaseBlock | HandlerBlock;

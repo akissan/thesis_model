@@ -21,6 +21,8 @@ export class SendingProcess extends Process {
 
   onFinish = () => {
     this.tables.units[this.unit].status = "finished";
+    this.tables.units[this.unit].requestState = "received";
+
     this.trashBin.push(this.unit);
   };
 }
