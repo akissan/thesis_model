@@ -3,6 +3,30 @@ const SIM_TIME = 50;
 const BUILDER_COUNT = 2;
 const HANLDERS_COUNT = 4;
 
+// const eventTimings = {
+//   connection_time: {
+//     time: 0,
+//   },
+//   request_handling: {
+//     time: 0,
+//   },
+//   build_time: {
+//     time: 12,
+//   },
+//   api_calls: {
+//     time: 0,
+//   },
+//   read_from_cache: {
+//     time: 0,
+//   },
+//   response_crafting: {
+//     time: 0,
+//   },
+//   response_receiving: {
+//     time: 0,
+//   },
+// };
+
 const eventTimings = {
   connection_time: {
     time: 5,
@@ -11,7 +35,7 @@ const eventTimings = {
     time: 2,
   },
   build_time: {
-    time: 16,
+    time: 5,
   },
   api_calls: {
     time: 3,
@@ -19,8 +43,11 @@ const eventTimings = {
   read_from_cache: {
     time: 1,
   },
+  response_crafting: {
+    time: 2,
+  },
   response_receiving: {
-    time: 3,
+    time: 5,
   },
 };
 

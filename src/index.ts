@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
-import { Block, BlockID, HandlerBlock } from "./blocks";
+import { HandlerBlock } from "./block/handlerBlock";
+import { Block, BlockID } from "./blocks";
+
 import { eventTimings, SIM_TIME } from "./parameters";
+import { getActiveProcessesLog } from "./prettyPrint";
 import { Process, ProcessID } from "./process";
 import { ConnectionProcess } from "./processes/connection";
 import { Queue, QueueID } from "./queue";
@@ -28,7 +31,7 @@ const main = () => {
 
   const unitTable: GlobalTables["units"] = {
     x1: newUnit("x1"),
-    // x2: newUnit("x2"),
+    x2: newUnit("x2"),
     // x3: newUnit("x3"),
   };
 
@@ -41,18 +44,26 @@ const main = () => {
     blocks: blockTable,
   };
 
-  new HandlerBlock({
-    queue: "handler_queue",
-    tables,
-    terminatedUnits,
-    id: "H1",
-  });
-  new HandlerBlock({
-    queue: "handler_queue",
-    tables,
-    terminatedUnits,
-    id: "H2",
-  });
+  const H1 = HandlerBlock(
+    {
+      id: "H1",
+      tables,
+    },
+    {
+      inputQueue: "handler_queue",
+      terminatedUnits,
+    }
+  );
+  const H2 = HandlerBlock(
+    {
+      id: "H2",
+      tables,
+    },
+    {
+      inputQueue: "handler_queue",
+      terminatedUnits,
+    }
+  );
 
   let t = 0;
 
@@ -62,10 +73,12 @@ const main = () => {
       unit.timeInSystem++;
 
       if (unit.status === "init") {
-        const connectionProcess = new ConnectionProcess({
+        ConnectionProcess({
           unit: unitID,
-          tables: tables,
-          handlerQueueID: "handler_queue",
+          tables,
+          additionalData: {
+            handlerQueueID: "handler_queue",
+          },
         });
       }
 
@@ -81,7 +94,7 @@ const main = () => {
     }
 
     // console.log(t, tables);
-    console.log(t, tables);
+    console.log(t.toString().padStart(4), getActiveProcessesLog(tables));
     t++;
   }
 };

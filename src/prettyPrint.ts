@@ -1,5 +1,35 @@
 import chalk from "chalk";
-import { Argv } from ".";
+import { Argv, GlobalTables } from ".";
+
+const randomColors = [
+  chalk.greenBright,
+  chalk.yellowBright,
+  chalk.magentaBright,
+  chalk.blueBright,
+  chalk.bgCyanBright,
+];
+
+const colorTable: Record<string, Function> = {};
+
+const rndClr = (str: string = "") => {
+  if (!colorTable[str]) {
+    let ri = Math.floor(Math.random() * randomColors.length);
+    colorTable[str] = randomColors[ri];
+  }
+  return colorTable[str](str);
+};
+
+export const getActiveProcessesLog = (tables: GlobalTables) =>
+  Object.values(tables.processes)
+    .filter((process) => process.state === "processing")
+    .map(
+      (process) =>
+        `[${process.id}] ${process.name.padStart(10)} (${process.timeLeft
+          .toString()
+          .padStart(2)}) UNIT: ${process.unit} BLOCK: ${rndClr(process.block)}`
+    )
+    .join("\n".padEnd(6));
+
 // import { Category, Note, NoteID, NotesData } from "./notes/Note";
 
 // const spacer = " ".padStart(2);

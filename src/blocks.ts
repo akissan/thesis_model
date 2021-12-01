@@ -1,18 +1,24 @@
 import chalk from "chalk";
 import { GlobalTables } from ".";
+import { HandlerBlock } from "./block/handlerBlock";
+import { Process } from "./process";
+import { CraftingProcess } from "./processes/crafting";
 import { ParsingProcess } from "./processes/parsing";
+import { ReadingProcess } from "./processes/reading";
 import { SendingProcess } from "./processes/sending";
 import { QueueID } from "./queue";
-import { UnitID } from "./unit";
+import { Unit, UnitID } from "./unit";
 import { uid } from "./util/utils";
 
 export type BlockID = string;
 
 export type BlockStatus = "idle" | "processing";
 
-type BaseProps = {
-  id?: BlockID;
-  tables: GlobalTables;
+export type BlockStateMachine = Record<Unit["requestState"], () => Process>;
+
+export type BaseBlockProps = {
+  id?: BaseBlock["id"];
+  tables: BaseBlock["tables"];
 };
 
 export class BaseBlock {
@@ -20,18 +26,32 @@ export class BaseBlock {
   status: BlockStatus = "idle";
   id: BlockID;
   tables: GlobalTables;
-  assignProcess?: Function;
+  blockData?: any;
   onIdle?: Function;
+  assignProcess?: (block: BaseBlock, unitID: UnitID) => Process;
 
-  constructor({ tables, id }: BaseProps) {
+  constructor({
+    tables,
+    id,
+    blockData,
+    assignProcess,
+    onIdle,
+  }: BaseBlockProps & {
+    assignProcess?: BaseBlock["assignProcess"];
+    onIdle?: BaseBlock["onIdle"];
+    blockData?: BaseBlock["blockData"];
+  }) {
     this.id = id ?? uid();
     this.tables = tables;
     this.tables.blocks[this.id] = this;
+    this.blockData = blockData;
+    this.assignProcess = assignProcess;
+    this.onIdle = onIdle;
   }
 
   step = () => {
     if (this.status === "idle") {
-      this.onIdle?.();
+      this.onIdle?.(this);
     }
   };
 
@@ -39,60 +59,8 @@ export class BaseBlock {
     this.currentOccupant = unitID;
     this.status = "processing";
 
-    this.assignProcess?.(unitID);
+    this.assignProcess?.(this, unitID);
   }
 }
 
-export class HandlerBlock extends BaseBlock {
-  inputQueue: QueueID;
-  //   time: number = 0;
-  //   nextBlockID: any;
-
-  terminatedUnits: UnitID[];
-
-  constructor({
-    queue,
-    tables,
-    terminatedUnits,
-    id,
-  }: BaseProps & {
-    queue: HandlerBlock["inputQueue"];
-    terminatedUnits: UnitID[];
-  }) {
-    super({ tables, id });
-    this.inputQueue = queue;
-    this.terminatedUnits = terminatedUnits;
-  }
-
-  assignProcess = (unit: UnitID) => {
-    const { requestState } = this.tables.units[unit];
-
-    if (requestState === "connected") {
-      new ParsingProcess({
-        unit,
-        tables: this.tables,
-        block: this.id,
-      });
-    }
-
-    if (requestState === "readed") {
-      new SendingProcess({
-        unit,
-        tables: this.tables,
-        terminatedUnits: this.terminatedUnits,
-        block: this.id,
-      });
-    }
-  };
-
-  onIdle = () => {
-    const inputQueue = this.tables.queues[this.inputQueue];
-    const freeUnitID = inputQueue.pop();
-
-    if (freeUnitID) {
-      this.occupe(freeUnitID);
-    }
-  };
-}
-
-export type Block = BaseBlock | HandlerBlock;
+export type Block = BaseBlock;

@@ -1,21 +1,27 @@
+import { BlockID } from "../blocks";
 import { eventTimings } from "../parameters";
 import { BaseProps, Process } from "../process";
 import { QueueID } from "../queue";
 
-export const ConnectionProcess = ({
+export const BuildingProcess = ({
   additionalData,
   ...baseProps
-}: BaseProps & { additionalData: { handlerQueueID: QueueID } }) =>
+}: BaseProps & {
+  additionalData: { handlerQueueID: QueueID };
+}) =>
   new Process({
     ...baseProps,
-    name: "connection",
-    processTime: eventTimings.connection_time.time,
+    name: "building",
+    processTime: eventTimings.build_time.time,
+    processData: additionalData,
     options: {
+      //   onStart: {
+      //       cleanBlock
+      //   },
       onFinish: {
-        unitRequestState: "connected",
+        unitRequestState: "builded",
       },
     },
-    processData: additionalData,
     onFinish: (process: Process) => {
       process.tables.units[process.unit].status = "waiting";
       process.tables.queues[process.processData.handlerQueueID].push(

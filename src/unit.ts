@@ -18,7 +18,8 @@ export type Unit = {
     | "parsed"
     | "readed"
     | "crafted"
-    | "received";
+    | "received"
+    | "builded";
   //   currentOccupation: null | BlockID;
   data?: any;
 };
