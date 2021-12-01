@@ -8,8 +8,8 @@ export const ReadingProcess = ({ ...baseProps }: BaseProps) =>
     processTime: eventTimings.read_from_cache.time,
     options: {
       onFinish: {
-        occupeOnFinish: true,
         unitRequestState: "readed",
+        occupeOnFinish: true,
       },
     },
   });

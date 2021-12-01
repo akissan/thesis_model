@@ -41,7 +41,7 @@ const eventTimings = {
     time: 3,
   },
   read_from_cache: {
-    time: 2,
+    time: 4,
   },
   response_crafting: {
     time: 2,

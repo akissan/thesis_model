@@ -1,12 +1,5 @@
-import chalk from "chalk";
 import { GlobalTables } from ".";
-import { HandlerBlock } from "./block/handlerBlock";
 import { Process, ProcessID } from "./process";
-import { CraftingProcess } from "./processes/crafting";
-import { ParsingProcess } from "./processes/parsing";
-import { ReadingProcess } from "./processes/reading";
-import { SendingProcess } from "./processes/sending";
-import { QueueID } from "./queue";
 import { Unit, UnitID } from "./unit";
 import { uid } from "./util/utils";
 
@@ -28,7 +21,7 @@ export class BaseBlock {
   tables: GlobalTables;
   blockData?: any;
   onIdle?: Function;
-  assignProcess?: (block: BaseBlock, unitID: UnitID) => Process;
+  assignProcess?: (block: BaseBlock, unitID: UnitID) => () => Process;
 
   constructor({
     tables,

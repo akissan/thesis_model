@@ -67,14 +67,14 @@ export const HandlerBlock = (
       );
       return stateMachine[
         requestState as keyof HandlerBlockStateMachinePackage
-      ]();
+      ];
     },
     onIdle: (block: BaseBlock) => {
       const inputQueue =
         block.tables.queues[block.blockData.inputQueue as QueueID];
       const freeUnitID = inputQueue.pop();
       if (freeUnitID) {
-        const newProcess = block.assignProcess?.(block, freeUnitID);
+        const newProcess = block.assignProcess?.(block, freeUnitID)();
       }
     },
   });

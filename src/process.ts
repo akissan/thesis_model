@@ -80,7 +80,7 @@ export class Process {
         const newProcess = this.tables.blocks[this.block].assignProcess?.(
           this.tables.blocks[this.block],
           this.unit
-        );
+        )();
       }
     }
 

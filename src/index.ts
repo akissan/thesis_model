@@ -109,6 +109,7 @@ const main = () => {
 
     console.log(t.toString().padStart(4), getActiveProcessesLog(tables));
     // console.log("  " + getBlockLog(tables), "\n");
+    // console.log(t.toString().padStart(4), tables);
     // console.log(t.toString().padStart(4) + " " + logUnit(tables, "x2"));
     t++;
   }

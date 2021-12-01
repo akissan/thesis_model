@@ -47,7 +47,7 @@ export const BuilderBlock = (
       );
       return stateMachine[
         requestState as keyof BuilderBlockStateMachinePackage
-      ]();
+      ];
     },
     onIdle: (block: BaseBlock) => {
       // console.log(block);
@@ -56,7 +56,7 @@ export const BuilderBlock = (
         block.tables.queues[block.blockData.inputQueue as QueueID];
       const freeUnitID = inputQueue.pop();
       if (freeUnitID) {
-        const newProcess = block.assignProcess?.(block, freeUnitID);
+        const newProcess = block.assignProcess?.(block, freeUnitID)();
       }
     },
   });
