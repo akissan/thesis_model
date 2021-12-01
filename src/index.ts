@@ -5,7 +5,7 @@ import { eventTimings, SIM_TIME } from "./parameters";
 import { Process, ProcessID } from "./process";
 import { ConnectionProcess } from "./processes/connection";
 import { Queue, QueueID } from "./queue";
-import { UnitID, Unit } from "./unit";
+import { UnitID, Unit, newUnit } from "./unit";
 import { argvOptions, initArgs } from "./util/argv";
 
 const argv = initArgs(argvOptions);
@@ -21,23 +21,18 @@ export type GlobalTables = {
 // const unitTravelMap = (unit: Unit) => {};
 
 const main = () => {
-  let unitCount = 1;
-
   const processTable: GlobalTables["processes"] = {};
   const terminatedUnits: UnitID[] = [];
   const handler_queue: Queue = [];
   const blockTable: GlobalTables["blocks"] = {};
 
   const unitTable: GlobalTables["units"] = {
-    x1: {
-      id: "x1",
-      status: "init",
-      process: null,
-      timeInSystem: 0,
-      data: {},
-      requestState: "init",
-    },
+    x1: newUnit("x1"),
+    // x2: newUnit("x2"),
+    // x3: newUnit("x3"),
   };
+
+  let unitCount = Object.keys(unitTable).length;
 
   const tables: GlobalTables = {
     queues: { handler_queue },
@@ -46,7 +41,18 @@ const main = () => {
     blocks: blockTable,
   };
 
-  new HandlerBlock({ queue: "handler_queue", tables, terminatedUnits });
+  new HandlerBlock({
+    queue: "handler_queue",
+    tables,
+    terminatedUnits,
+    id: "H1",
+  });
+  new HandlerBlock({
+    queue: "handler_queue",
+    tables,
+    terminatedUnits,
+    id: "H2",
+  });
 
   let t = 0;
 
@@ -74,6 +80,7 @@ const main = () => {
       block.step();
     }
 
+    // console.log(t, tables);
     console.log(t, tables);
     t++;
   }

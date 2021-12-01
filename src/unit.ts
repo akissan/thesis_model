@@ -1,5 +1,6 @@
 import { BlockID } from "./blocks";
 import { ProcessID } from "./process";
+import { uid } from "./util/utils";
 
 export type UnitID = string;
 
@@ -21,3 +22,12 @@ export type Unit = {
   //   currentOccupation: null | BlockID;
   data?: any;
 };
+
+export const newUnit = (id?: UnitID): Unit => ({
+  id: id ?? uid(),
+  status: "init",
+  process: null,
+  timeInSystem: 0,
+  data: {},
+  requestState: "init",
+});

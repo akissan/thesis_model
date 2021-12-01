@@ -6,6 +6,7 @@ export class ConnectionProcess extends Process {
   handlerQueueID: QueueID;
 
   constructor({
+    id,
     unit,
     tables,
     handlerQueueID,
@@ -15,6 +16,7 @@ export class ConnectionProcess extends Process {
       processTime: eventTimings.connection_time.time,
       unit,
       tables,
+      id,
     });
     this.handlerQueueID = handlerQueueID;
   }

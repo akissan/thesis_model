@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { GlobalTables } from ".";
+import { ParsingProcess } from "./processes/parsing";
 import { SendingProcess } from "./processes/sending";
 import { QueueID } from "./queue";
 import { UnitID } from "./unit";
@@ -10,6 +11,7 @@ export type BlockID = string;
 export type BlockStatus = "idle" | "processing";
 
 type BaseProps = {
+  id?: BlockID;
   tables: GlobalTables;
 };
 
@@ -21,8 +23,8 @@ export class BaseBlock {
   assignProcess?: Function;
   onIdle?: Function;
 
-  constructor({ tables }: BaseProps) {
-    this.id = uid();
+  constructor({ tables, id }: BaseProps) {
+    this.id = id ?? uid();
     this.tables = tables;
     this.tables.blocks[this.id] = this;
   }
@@ -37,7 +39,7 @@ export class BaseBlock {
     this.currentOccupant = unitID;
     this.status = "processing";
 
-    this.assignProcess?.();
+    this.assignProcess?.(unitID);
   }
 }
 
@@ -52,24 +54,33 @@ export class HandlerBlock extends BaseBlock {
     queue,
     tables,
     terminatedUnits,
+    id,
   }: BaseProps & {
     queue: HandlerBlock["inputQueue"];
     terminatedUnits: UnitID[];
   }) {
-    super({ tables });
+    super({ tables, id });
     this.inputQueue = queue;
     this.terminatedUnits = terminatedUnits;
   }
 
-  assignProcess = () => {
-    if (
-      this.currentOccupant &&
-      this.tables.units[this.currentOccupant].requestState === "connected"
-    ) {
+  assignProcess = (unit: UnitID) => {
+    const { requestState } = this.tables.units[unit];
+
+    if (requestState === "connected") {
+      new ParsingProcess({
+        unit,
+        tables: this.tables,
+        block: this.id,
+      });
+    }
+
+    if (requestState === "readed") {
       new SendingProcess({
-        unit: this.currentOccupant,
+        unit,
         tables: this.tables,
         terminatedUnits: this.terminatedUnits,
+        block: this.id,
       });
     }
   };

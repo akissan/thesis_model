@@ -6,15 +6,19 @@ export class SendingProcess extends Process {
   trashBin: UnitID[];
 
   constructor({
+    id,
     unit,
     tables,
     terminatedUnits,
+    block,
   }: BaseProps & { terminatedUnits: SendingProcess["trashBin"] }) {
     super({
       name: "sending",
       processTime: eventTimings.response_receiving.time,
       unit,
       tables,
+      block,
+      id,
     });
     this.trashBin = terminatedUnits;
   }

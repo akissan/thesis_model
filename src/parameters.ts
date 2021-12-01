@@ -1,4 +1,4 @@
-const SIM_TIME = 15;
+const SIM_TIME = 50;
 
 const BUILDER_COUNT = 2;
 const HANLDERS_COUNT = 4;
