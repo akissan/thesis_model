@@ -1,57 +1,81 @@
 #!/usr/bin/env node
 
-import { SIM_TIME } from "./parameters";
-import { Schedule, ScheduleEntry } from "./schedule";
-import { copyState, initState } from "./state";
-import { UnitID } from "./unit";
+import { Block, BlockID, HandlerBlock } from "./blocks";
+import { eventTimings, SIM_TIME } from "./parameters";
+import { Process, ProcessID } from "./process";
+import { ConnectionProcess } from "./processes/connection";
+import { Queue, QueueID } from "./queue";
+import { UnitID, Unit } from "./unit";
 import { argvOptions, initArgs } from "./util/argv";
-import { log, logError, uid } from "./util/utils";
 
 const argv = initArgs(argvOptions);
 export type Argv = typeof argv;
 
-export type Block = any;
-
-export type Unit = {
-  id: UnitID;
-  timeInSystem: number;
-  taskTime: number;
-  currentBlock: Block;
+export type GlobalTables = {
+  queues: Record<QueueID, Queue>;
+  units: Record<UnitID, Unit>;
+  processes: Record<ProcessID, Process>;
+  blocks: Record<BlockID, Block>;
 };
 
-const process = ({ state, activeUnits }: ScheduleEntry): ScheduleEntry => {
-  for (const unit in activeUnits) {
-    // console.log();
-  }
-
-  const newState = copyState(state);
-  const newActiveUnits: UnitID[] = [];
-
-  return { state: newState, activeUnits: newActiveUnits };
-};
+// const unitTravelMap = (unit: Unit) => {};
 
 const main = () => {
-  const initUnit: Unit = {
-    id: uid(),
-    timeInSystem: 0,
-    currentBlock: null,
+  let unitCount = 1;
+
+  const processTable: GlobalTables["processes"] = {};
+  const terminatedUnits: UnitID[] = [];
+  const handler_queue: Queue = [];
+  const blockTable: GlobalTables["blocks"] = {};
+
+  const unitTable: GlobalTables["units"] = {
+    x1: {
+      id: "x1",
+      status: "init",
+      process: null,
+      timeInSystem: 0,
+      data: {},
+      requestState: "init",
+    },
   };
 
-  const unitTable: Record<UnitID, Unit> = {
-    [initUnit.id]: initUnit,
+  const tables: GlobalTables = {
+    queues: { handler_queue },
+    units: unitTable,
+    processes: processTable,
+    blocks: blockTable,
   };
 
-  const scheduleManager = new Schedule({
-    state: { ...initState, ...{ request_queue: [] } },
-    activeUnits: [initUnit.id],
-  });
+  new HandlerBlock({ queue: "handler_queue", tables, terminatedUnits });
 
-  for (let t = 0; t < SIM_TIME; t++) {
-    console.log(`[ ${t.toString().padStart(4)} ]`);
-    const currentStep = scheduleManager.schedule[t];
-    // const newStep = process(currentStep, unitTable);
+  let t = 0;
 
-    scheduleManager.schedule.push(newStep);
+  while (terminatedUnits.length !== unitCount && t < SIM_TIME) {
+    for (const unitID in unitTable) {
+      const unit = unitTable[unitID];
+      unit.timeInSystem++;
+
+      if (unit.status === "init") {
+        const connectionProcess = new ConnectionProcess({
+          unit: unitID,
+          tables: tables,
+          handlerQueueID: "handler_queue",
+        });
+      }
+
+      if (unit.status === "processing" && unit.process) {
+        const process = processTable[unit.process];
+        process.step();
+      }
+    }
+
+    for (const blockID in blockTable) {
+      const block = blockTable[blockID];
+      block.step();
+    }
+
+    console.log(t, tables);
+    t++;
   }
 };
 

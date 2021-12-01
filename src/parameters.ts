@@ -20,7 +20,7 @@ const eventTimings = {
     time: 1,
   },
   response_receiving: {
-    time: 2,
+    time: 3,
   },
 };
 
