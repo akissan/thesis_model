@@ -1,3 +1,4 @@
+import { table } from "console";
 import { BlockID } from "../blocks";
 import { eventTimings } from "../parameters";
 import { BaseProps, Process } from "../process";
@@ -15,9 +16,6 @@ export const BuildingProcess = ({
     processTime: eventTimings.build_time.time,
     processData: additionalData,
     options: {
-      //   onStart: {
-      //       cleanBlock
-      //   },
       onFinish: {
         unitRequestState: "builded",
       },

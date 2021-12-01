@@ -29,7 +29,7 @@ const HANLDERS_COUNT = 4;
 
 const eventTimings = {
   connection_time: {
-    time: 5,
+    time: 0,
   },
   request_handling: {
     time: 2,
@@ -41,13 +41,13 @@ const eventTimings = {
     time: 3,
   },
   read_from_cache: {
-    time: 1,
+    time: 2,
   },
   response_crafting: {
     time: 2,
   },
   response_receiving: {
-    time: 5,
+    time: 4,
   },
 };
 

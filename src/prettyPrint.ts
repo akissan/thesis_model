@@ -1,12 +1,14 @@
 import chalk from "chalk";
+import { table } from "console";
 import { Argv, GlobalTables } from ".";
+import { UnitID } from "./unit";
 
 const randomColors = [
   chalk.greenBright,
   chalk.yellowBright,
   chalk.magentaBright,
   chalk.blueBright,
-  chalk.bgCyanBright,
+  chalk.cyanBright,
 ];
 
 const colorTable: Record<string, Function> = {};
@@ -26,10 +28,26 @@ export const getActiveProcessesLog = (tables: GlobalTables) =>
       (process) =>
         `[${process.id}] ${process.name.padStart(10)} (${process.timeLeft
           .toString()
-          .padStart(2)}) UNIT: ${process.unit} BLOCK: ${rndClr(process.block)}`
+          .padStart(2)}) UNIT: ${rndClr(process.unit)} BLOCK: ${rndClr(
+          process.block
+        )}`
     )
     .join("\n".padEnd(6));
 
+export const getBlockLog = (tables: GlobalTables) =>
+  Object.values(tables.blocks)
+    .map((block) => `${block.id} [${block.status}] ${block.process}`)
+    .join("\n".padEnd(6));
+
+export const logUnit = (table: GlobalTables, unitID: UnitID) => {
+  const unit = table.units[unitID];
+  return `[${unit.id.toString().padStart(6)}] ${chalk.blue(
+    `${(unit.process ?? "").padStart(6)} ${(
+      (unit.process && table.processes[unit.process].name) ??
+      ""
+    ).padStart(12)}`
+  )} TIME: ${chalk.green(unit.timeInSystem)}`;
+};
 // import { Category, Note, NoteID, NotesData } from "./notes/Note";
 
 // const spacer = " ".padStart(2);

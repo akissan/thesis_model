@@ -1,5 +1,6 @@
 import { eventTimings } from "../parameters";
 import { BaseProps, Process } from "../process";
+import { SendingProcess } from "./sending";
 
 export const CraftingProcess = ({ ...baseProps }: BaseProps) =>
   new Process({

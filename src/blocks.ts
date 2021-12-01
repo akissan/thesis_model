@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { GlobalTables } from ".";
 import { HandlerBlock } from "./block/handlerBlock";
-import { Process } from "./process";
+import { Process, ProcessID } from "./process";
 import { CraftingProcess } from "./processes/crafting";
 import { ParsingProcess } from "./processes/parsing";
 import { ReadingProcess } from "./processes/reading";
@@ -22,8 +22,8 @@ export type BaseBlockProps = {
 };
 
 export class BaseBlock {
-  currentOccupant: UnitID | null = null;
   status: BlockStatus = "idle";
+  process?: ProcessID;
   id: BlockID;
   tables: GlobalTables;
   blockData?: any;
@@ -55,11 +55,14 @@ export class BaseBlock {
     }
   };
 
-  occupe(unitID: UnitID) {
-    this.currentOccupant = unitID;
+  occupe(processID: ProcessID) {
     this.status = "processing";
+    this.process = processID;
+  }
 
-    this.assignProcess?.(this, unitID);
+  free() {
+    this.status = "idle";
+    this.process = undefined;
   }
 }
 

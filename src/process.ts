@@ -62,6 +62,10 @@ export class Process {
     tables.units[unit].status = "processing";
     tables.units[unit].process = this.id;
     tables.processes[this.id] = this;
+
+    if (this.block) {
+      tables.blocks[this.block].occupe(this.id);
+    }
   }
 
   prefinish = () => {
@@ -70,11 +74,13 @@ export class Process {
     this.tables.units[this.unit].process = null;
 
     if (this.block) {
-      this.tables.blocks[this.block].status = "idle";
-      this.tables.blocks[this.block].currentOccupant = null;
+      this.tables.blocks[this.block].free();
 
       if (this.options?.onFinish?.occupeOnFinish) {
-        this.tables.blocks[this.block].occupe(this.unit);
+        const newProcess = this.tables.blocks[this.block].assignProcess?.(
+          this.tables.blocks[this.block],
+          this.unit
+        );
       }
     }
 

@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
+import { BuilderBlock } from "./block/builderBlock";
 import { HandlerBlock } from "./block/handlerBlock";
 import { Block, BlockID } from "./blocks";
 
 import { eventTimings, SIM_TIME } from "./parameters";
-import { getActiveProcessesLog } from "./prettyPrint";
+import { getActiveProcessesLog, getBlockLog, logUnit } from "./prettyPrint";
 import { Process, ProcessID } from "./process";
 import { ConnectionProcess } from "./processes/connection";
 import { Queue, QueueID } from "./queue";
@@ -27,18 +28,19 @@ const main = () => {
   const processTable: GlobalTables["processes"] = {};
   const terminatedUnits: UnitID[] = [];
   const handler_queue: Queue = [];
+  const builder_queue: Queue = [];
   const blockTable: GlobalTables["blocks"] = {};
 
   const unitTable: GlobalTables["units"] = {
     x1: newUnit("x1"),
-    x2: newUnit("x2"),
+    // x2: newUnit("x2"),
     // x3: newUnit("x3"),
   };
 
   let unitCount = Object.keys(unitTable).length;
 
   const tables: GlobalTables = {
-    queues: { handler_queue },
+    queues: { handler_queue, builder_queue },
     units: unitTable,
     processes: processTable,
     blocks: blockTable,
@@ -51,6 +53,7 @@ const main = () => {
     },
     {
       inputQueue: "handler_queue",
+      builderQueue: "builder_queue",
       terminatedUnits,
     }
   );
@@ -61,7 +64,18 @@ const main = () => {
     },
     {
       inputQueue: "handler_queue",
+      builderQueue: "builder_queue",
       terminatedUnits,
+    }
+  );
+  const B1 = BuilderBlock(
+    {
+      id: "B2",
+      tables,
+    },
+    {
+      inputQueue: "builder_queue",
+      handlerQueueID: "handler_queue",
     }
   );
 
@@ -93,8 +107,9 @@ const main = () => {
       block.step();
     }
 
-    // console.log(t, tables);
     console.log(t.toString().padStart(4), getActiveProcessesLog(tables));
+    // console.log("  " + getBlockLog(tables), "\n");
+    // console.log(t.toString().padStart(4) + " " + logUnit(tables, "x2"));
     t++;
   }
 };

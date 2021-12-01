@@ -10,31 +10,26 @@ import { UnitID } from "../unit";
 
 type HandlerBlockStateMachinePackage = Pick<
   BlockStateMachine,
-  "connected" | "parsed" | "readed" | "crafted" | "builded"
+  "connected" | "readed" | "builded" | "crafted"
 >;
-
-const pageInCache = (unit: UnitID) => {
-  return false;
-};
 
 const HandlerBlockStateMachine = (
   baseProps: BaseProps,
-  blockData: { inputQueue: QueueID; terminatedUnits: UnitID[] }
+  blockData: {
+    inputQueue: QueueID;
+    builderQueue: QueueID;
+    terminatedUnits: UnitID[];
+  }
 ): HandlerBlockStateMachinePackage => {
   return {
-    connected: () => ParsingProcess(baseProps),
-    parsed: () => {
-      if (pageInCache(baseProps.unit)) {
-        return ReadingProcess(baseProps);
-      } else {
-        return BuildingProcess({
-          ...baseProps,
-          block: undefined,
-          additionalData: { handlerQueueID: blockData.inputQueue },
-        });
-        // throw new Error("KEKW");
-      }
-    },
+    connected: () =>
+      ParsingProcess({
+        ...baseProps,
+        additionalData: {
+          builder_queue: blockData.builderQueue,
+          handler_queue: blockData.inputQueue,
+        },
+      }),
     builded: () => ReadingProcess(baseProps),
     readed: () => CraftingProcess(baseProps),
     crafted: () =>
@@ -49,7 +44,11 @@ const HandlerBlockStateMachine = (
 
 export const HandlerBlock = (
   baseProps: BaseBlockProps,
-  additionalData: { inputQueue: QueueID; terminatedUnits: UnitID[] }
+  additionalData: {
+    inputQueue: QueueID;
+    builderQueue: QueueID;
+    terminatedUnits: UnitID[];
+  }
 ) =>
   new BaseBlock({
     ...baseProps,
@@ -71,15 +70,11 @@ export const HandlerBlock = (
       ]();
     },
     onIdle: (block: BaseBlock) => {
-      //   console.log(block);
-
       const inputQueue =
         block.tables.queues[block.blockData.inputQueue as QueueID];
-
       const freeUnitID = inputQueue.pop();
-
       if (freeUnitID) {
-        block.occupe(freeUnitID);
+        const newProcess = block.assignProcess?.(block, freeUnitID);
       }
     },
   });
