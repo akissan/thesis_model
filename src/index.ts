@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import { BlockList } from "net";
 import { argvOptions, initArgs } from "./util/argv";
 import { uid } from "./util/utils";
 
@@ -8,6 +7,16 @@ const argv = initArgs(argvOptions);
 export type Argv = typeof argv;
 
 export type UnitID = string;
+export type ResponseState =
+  | "new"
+  | "connected"
+  | "parsed"
+  | "cached"
+  | "readed"
+  | "crafted"
+  | "builded";
+// "";
+
 export class Unit {
   id: UnitID;
   constructor() {
@@ -62,9 +71,26 @@ export type BlockID = string;
 export class Block {
   id: BlockID;
   name: string;
+  process?: Process;
+  status: "processing" | "idle";
 
   constructor({ name }: BaseBlockProps) {
     this.id = uid();
     this.name = name;
+    this.status = "idle";
   }
 }
+
+export type Queue = Array<Unit>;
+
+const main = () => {
+  const handlerQueue: Queue = [];
+  const builderQueue: Queue = [];
+
+  const H1 = new Block({ name: "handler_0" });
+  const B1 = new Block({ name: "builder_0" });
+
+  const U1 = new Unit();
+
+  handlerQueue.push(U1);
+};

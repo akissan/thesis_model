@@ -5,6 +5,7 @@ exports.Block = exports.Process = exports.Unit = void 0;
 const argv_1 = require("./util/argv");
 const utils_1 = require("./util/utils");
 const argv = (0, argv_1.initArgs)(argv_1.argvOptions);
+// "";
 class Unit {
     constructor() {
         this.id = (0, utils_1.uid)();
@@ -36,6 +37,15 @@ class Block {
     constructor({ name }) {
         this.id = (0, utils_1.uid)();
         this.name = name;
+        this.status = "idle";
     }
 }
 exports.Block = Block;
+const main = () => {
+    const handlerQueue = [];
+    const builderQueue = [];
+    const H1 = new Block({ name: "handler_0" });
+    const B1 = new Block({ name: "builder_0" });
+    const U1 = new Unit();
+    handlerQueue.push(U1);
+};
