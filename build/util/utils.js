@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.log = exports.logError = exports.uid = void 0;
+exports.clog = exports.logError = exports.uid = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const crypto_1 = __importDefault(require("crypto"));
 const util_1 = require("util");
@@ -22,4 +22,4 @@ const logError = (err) => {
     }
 };
 exports.logError = logError;
-exports.log = console.log;
+exports.clog = console.log;

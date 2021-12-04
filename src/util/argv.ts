@@ -1,6 +1,6 @@
 import yargs, { Argv } from "yargs";
 // import { Argv } from ".";
-import { log } from "./utils";
+// import { log } from "./utils";
 
 declare global {
   namespace NodeJS {
@@ -82,6 +82,6 @@ export const initArgs = (options: typeof argvOptions) => {
 
   // global.VERBOSE = args.verbose;
   global.VERBOSE = true;
-  if (global.VERBOSE) log("ARGS: ", args);
+  // if (global.VERBOSE) log("ARGS: ", args);
   return args;
 };

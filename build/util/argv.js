@@ -5,8 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initArgs = exports.argvOptions = void 0;
 const yargs_1 = __importDefault(require("yargs"));
-// import { Argv } from ".";
-const utils_1 = require("./utils");
 exports.argvOptions = 
 // : Record<string, yargs.Options>
 {
@@ -71,8 +69,7 @@ const initArgs = (options) => {
         .parseSync();
     // global.VERBOSE = args.verbose;
     global.VERBOSE = true;
-    if (global.VERBOSE)
-        (0, utils_1.log)("ARGS: ", args);
+    // if (global.VERBOSE) log("ARGS: ", args);
     return args;
 };
 exports.initArgs = initArgs;

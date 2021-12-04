@@ -18,4 +18,4 @@ export const logError = (err: unknown) => {
   }
 };
 
-export const log = console.log;
+export const clog = console.log;
