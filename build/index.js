@@ -1,171 +1,51 @@
 #!/usr/bin/env node
 "use strict";
-var _a;
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.BuilderBlock = exports.HandlerBlock = exports.Block = exports.Process = exports.Unit = exports.builderAcceptedResponseStates = exports.handlerAcceptedResponseStates = void 0;
-const prettyPrint_1 = require("./prettyPrint");
-const argv_1 = require("./util/argv");
-const utils_1 = require("./util/utils");
-const argv = (0, argv_1.initArgs)(argv_1.argvOptions);
-exports.handlerAcceptedResponseStates = [
-    "new",
-    "connected",
-    "parsed",
-    "cached",
-    "readed",
-    "crafted",
-    "builded",
-];
-exports.builderAcceptedResponseStates = [
-    "not_cached",
-    "api_called",
-];
-/*
-  | "new"
-  | "connected"
-  | "parsed"
-  | "cached"
-  | "readed"
-  | "crafted"
-  | "builded";
-*/
-class Unit {
-    constructor() {
-        this.id = (0, utils_1.uid)();
-        this.state = "new";
-    }
-}
-exports.Unit = Unit;
-class Process {
-    constructor({ timeLeft, onFinish, unit, name, }) {
-        this.step = () => {
-            // if (this.status === "")
-            var _b;
-            if (this.status === "processing") {
-                this.timeLeft--;
-                if (this.timeLeft <= 0) {
-                    (_b = this.onFinish) === null || _b === void 0 ? void 0 : _b.call(this, this);
-                }
-            }
-        };
-        this.id = (0, utils_1.uid)();
-        this.status = "processing";
-        this.timeLeft = timeLeft;
-        this.onFinish = onFinish;
-        this.unit = unit;
-        this.name = name;
-    }
-}
-exports.Process = Process;
-class Block {
-    constructor({ name, inputQueue, outputQueue }) {
-        this.checkQueue = (queue) => {
-            const unit = queue.shift();
-            if (!unit)
-                return;
-            console.log(`I've got a ${unit.id} from queue`);
-            this.decideProcess(unit);
-        };
-        this.shouldStay = (unit) => this.allowedOperations.includes(unit.state);
-        this.decideProcess = (unit) => {
-            if (this.shouldStay(unit)) {
-                this.process = this.assignProcess(unit);
-            }
-            else {
-                this.transferSomewhere(unit);
-            }
-        };
-        this.transferSomewhere = (unit) => {
-            console.log("where should i transfer " + prettyPrint_1.pp.unit(unit) + "?");
-        };
-        this.step = () => {
-            if (this.status === "idle") {
-                this.checkQueue(this.inputQueue);
-            }
-        };
-        this.id = (0, utils_1.uid)();
-        this.name = name;
-        this.status = "idle";
-        this.inputQueue = inputQueue;
-        this.outputQueue = outputQueue;
-        // if (!Block.blockTable) throw new Error("Block.blockTable is not defined");
-        Block.blockTable.set(this.id, this);
-    }
-}
-exports.Block = Block;
-_a = Block;
-Block.init = ({ blockTable }) => {
-    _a.blockTable = blockTable;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-class HandlerBlock extends Block {
-    constructor() {
-        super(...arguments);
-        this.allowedOperations = [...exports.handlerAcceptedResponseStates];
-        this.assignProcess = (unit) => {
-            if (unit.state === "new") {
-                return new Process({
-                    name: "Connection",
-                    timeLeft: 4,
-                    unit,
-                    onFinish: (process) => {
-                        process.unit.state = "connected";
-                    },
-                });
-            }
-            if (unit.state === "connected") {
-                return new Process({
-                    name: "Parsing",
-                    timeLeft: 5,
-                    unit,
-                    onFinish: (process) => {
-                        process.unit.state = "parsed";
-                    },
-                });
-            }
-        };
-    }
-}
-exports.HandlerBlock = HandlerBlock;
-class BuilderBlock extends Block {
-    constructor() {
-        super(...arguments);
-        this.allowedOperations = [...exports.builderAcceptedResponseStates];
-        this.assignProcess = (unit) => {
-            if (unit.state == "not_cached") {
-                return new Process({
-                    name: "Caching",
-                    timeLeft: 2,
-                    unit,
-                    onFinish: (process) => {
-                        process.unit.state = "cached";
-                    },
-                });
-            }
-        };
-    }
-}
-exports.BuilderBlock = BuilderBlock;
+Object.defineProperty(exports, "__esModule", { value: true });
+const block_1 = __importDefault(require("./components/block"));
+const builder_1 = __importDefault(require("./components/blocks/builder"));
+const handler_1 = __importDefault(require("./components/blocks/handler"));
+const process_1 = __importDefault(require("./components/process"));
+const unit_1 = __importDefault(require("./components/unit"));
+const argv_1 = require("./tools/argv");
+const prettyPrint_1 = require("./tools/prettyPrint");
+const utils_1 = require("./tools/utils");
+const argv = (0, argv_1.initArgs)(argv_1.argvOptions);
 const main = () => {
     const handlerQueue = [];
     const builderQueue = [];
+    const finishQueue = [];
+    const processTable = new Map();
     const blockTable = new Map();
-    Block.init({ blockTable });
-    const H1 = new HandlerBlock({
+    const unitTable = new Map();
+    const tables = { processTable, blockTable, unitTable };
+    const queues = { handlerQueue, builderQueue, finishQueue };
+    block_1.default.init({ blockTable });
+    process_1.default.init({ processTable });
+    unit_1.default.init({ unitTable });
+    const U1 = new unit_1.default();
+    const H1 = new handler_1.default({
         name: "handler_0",
         inputQueue: handlerQueue,
-        outputQueue: { builderQueue },
+        outputQueue: { builderQueue, finishQueue },
     });
-    const B1 = new BuilderBlock({
+    const B1 = new builder_1.default({
         name: "builder_0",
         inputQueue: builderQueue,
         outputQueue: { handlerQueue },
     });
-    // blockTable.set(H1.id, H1);
-    const U1 = new Unit();
-    handlerQueue.push(U1);
+    H1.inputQueue.push(U1);
     console.log("Blocks");
-    for (let t = 0; t < 10; t++) {
-        for (const [blockID, block] of Block.blockTable) {
+    // for (let t = 0; t < 30; t++) {
+    while (finishQueue.length !== unit_1.default.unitTable.size) {
+        console.log(queues);
+        for (const [processID, process] of process_1.default.processTable) {
+            // clog(pp.process(process));
+            process.step();
+        }
+        for (const [blockID, block] of block_1.default.blockTable) {
             (0, utils_1.clog)(prettyPrint_1.pp.block(block));
             block.step();
         }
