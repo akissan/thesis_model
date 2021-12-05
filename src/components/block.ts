@@ -1,8 +1,5 @@
-import { GLOBAL_OPTIONS } from "..";
 import { pp } from "../tools/prettyPrint";
-import { uid } from "../tools/utils";
 import { BlockTable } from "../types/tables";
-import { builderAcceptedResponseStates } from "./blocks/builder";
 import Entity, { BaseEntityProps } from "./entity";
 import Process from "./process";
 import { Queue } from "./queue";
@@ -27,6 +24,9 @@ export default abstract class Block extends Entity {
   abstract decideTransfer: (unit: Unit) => Queue | undefined;
 
   static table: BlockTable;
+  static setTable = (table: typeof Block.table) => {
+    Block.table = table;
+  };
 
   constructor({ name, inputQueue, outputQueue, id }: BaseBlockProps) {
     super({ id });
@@ -34,6 +34,8 @@ export default abstract class Block extends Entity {
     this.status = "idle";
     this.inputQueue = inputQueue;
     this.outputQueue = outputQueue;
+
+    Block.table.set(this.id, this);
   }
 
   step = () => {

@@ -1,7 +1,8 @@
 import chalk from "chalk";
 import Block from "../components/block";
 import Process from "../components/process";
-import Unit from "../components/unit";
+import Unit, { UnitTable } from "../components/unit";
+import { BlockTable, ProcessTable } from "../types/tables";
 
 const randomColors = [
   // chalk.greenBright,
@@ -35,8 +36,8 @@ const block = ({ id, name, process, status }: Block) => {
 };
 
 const unit = ({ id, state }: Unit) => {
-  const info = [chalk.magenta("Unit  ")];
-  info.push(chalk.bgBlack(rndClr(id)));
+  const info = [chalk.magenta("Unit   ")];
+  info.push(chalk.bgBlack(rndClr(id).padStart(6)));
   info.push(chalk.greenBright(state));
   return info.join(" ");
 };
@@ -52,6 +53,30 @@ const process = ({ id, name, status, timeLeft, unit, totalTime }: Process) => {
   );
 
   return info.join(" ");
+};
+
+export const tableMap = (
+  table: UnitTable | ProcessTable | BlockTable,
+  options: { logInactiveProcesses: boolean }
+) => {
+  // if (typeof table === typeof UnitTable)
+  const result = [];
+  for (const [_, entity] of table) {
+    if (entity instanceof Unit) {
+      result.push(unit(entity));
+    }
+    if (entity instanceof Process) {
+      if (
+        entity.status === "processing" ||
+        (entity.status === "finished" && options.logInactiveProcesses)
+      )
+        result.push(process(entity));
+    }
+    if (entity instanceof Block) {
+      result.push(block(entity));
+    }
+  }
+  return result.length > 0 ? result.join("\n") : "Table is empty";
 };
 
 export const pp = { block, unit, process };

@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 
-import Block, { BlockID } from "./components/block";
+import chalk from "chalk";
+import Block from "./components/block";
 import BuilderBlock from "./components/blocks/builder";
 import HandlerBlock from "./components/blocks/handler";
-import Process, { ProcessID } from "./components/process";
+import Entity from "./components/entity";
+import Process from "./components/process";
 import { Queue } from "./components/queue";
 import Unit, { UnitTable } from "./components/unit";
-import { initArgs, argvOptions } from "./tools/argv";
-import { pp } from "./tools/prettyPrint";
+import { argvOptions, initArgs } from "./tools/argv";
+import { tableMap } from "./tools/prettyPrint";
 import { clog } from "./tools/utils";
-import { ProcessTable, BlockTable } from "./types/tables";
+import { BlockTable, ProcessTable } from "./types/tables";
 
 const argv = initArgs(argvOptions);
 const { id_length } = argv;
@@ -17,6 +19,17 @@ export type Argv = typeof argv;
 
 export const GLOBAL_OPTIONS = {
   id_length,
+};
+
+export type clogCurrentTablesOptions = {
+  logInactiveProcesses: boolean;
+};
+const clogCurrentTables = (
+  options: clogCurrentTablesOptions = { logInactiveProcesses: false }
+) => {
+  clog(chalk.greenBright("Blocks:\n") + tableMap(Block.table, options));
+  clog(chalk.blueBright("Processes: \n") + tableMap(Process.table, options));
+  clog(chalk.magentaBright("Units: \n") + tableMap(Unit.table, options));
 };
 
 const main = () => {
@@ -28,12 +41,11 @@ const main = () => {
   const blockTable: BlockTable = new Map();
   const unitTable: UnitTable = new Map();
 
-  const tables = { processTable, blockTable, unitTable };
-  const queues = { handlerQueue, builderQueue, finishQueue };
+  Entity.init({ ...GLOBAL_OPTIONS });
 
-  Block.init({ table: blockTable, GLOBAL_OPTIONS });
-  Process.init({ table: processTable, GLOBAL_OPTIONS });
-  Unit.init({ table: unitTable, GLOBAL_OPTIONS });
+  Block.setTable(blockTable);
+  Process.setTable(processTable);
+  Unit.setTable(unitTable);
 
   const U1 = new Unit();
 
@@ -52,19 +64,16 @@ const main = () => {
   H1.inputQueue.push(U1);
 
   console.log("Blocks");
-  // for (let t = 0; t < 30; t++) {
+
+  clogCurrentTables();
   let t = 0;
   while (finishQueue.length !== Unit.table.size) {
-    // console.log(queues);
-    console.log(t);
+    clogCurrentTables();
     for (const [processID, process] of Process.table) {
       process.step();
-      if (process.status === "processing") clog(pp.process(process));
     }
-
     for (const [blockID, block] of Block.table) {
       block.step();
-      // clog(pp.block(block));
     }
     t++;
   }

@@ -3,7 +3,7 @@ import { pp } from "../../tools/prettyPrint";
 import Block, { BaseBlockProps } from "../block";
 import Process from "../process";
 import { Queue } from "../queue";
-import { BuilderAcceptedResponseStates, ResponseState } from "../response";
+import { BuilderAcceptedResponseStates } from "../response";
 import Unit from "../unit";
 import { handlerAcceptedResponseStates } from "./handler";
 

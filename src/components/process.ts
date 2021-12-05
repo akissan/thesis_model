@@ -1,5 +1,3 @@
-import { GLOBAL_OPTIONS } from "..";
-import { uid } from "../tools/utils";
 import { ProcessTable } from "../types/tables";
 import Block from "./block";
 import Entity, { BaseEntityProps } from "./entity";
@@ -29,6 +27,9 @@ export default class Process extends Entity {
   };
 
   static table: ProcessTable;
+  static setTable = (table: typeof Process.table) => {
+    Process.table = table;
+  };
 
   constructor({
     timeLeft,
@@ -51,6 +52,8 @@ export default class Process extends Entity {
     this.parentBlock = parentBlock;
     this.options = options;
     this.totalTime = timeLeft;
+
+    Process.table.set(this.id, this);
   }
 
   baseFinish = (process: Process) => {
