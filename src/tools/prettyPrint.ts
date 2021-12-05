@@ -12,7 +12,7 @@ const randomColors = [
   chalk.magenta,
   chalk.cyan,
   chalk.green,
-  chalk.white,
+  // chalk.white,
   chalk.blue,
 ];
 
@@ -32,6 +32,10 @@ const block = ({ id, name, process, status }: Block) => {
   info.push(chalk.green(name).padStart(8));
   info.push(chalk.blue(process?.name ?? " ").padStart(20));
   info.push((status === "idle" ? chalk.gray : chalk.greenBright)(status));
+
+  if (process?.unit) {
+    info.push(chalk.yellow(process?.unit.id));
+  }
   return info.join(" ");
 };
 
@@ -45,19 +49,20 @@ const unit = ({ id, state }: Unit) => {
 const process = ({ id, name, status, timeLeft, unit, totalTime }: Process) => {
   const info = [chalk.blue("Process")];
   info.push(chalk.bgBlack(rndClr(id)));
-  info.push(rndClr((name ?? " ").padStart(22)));
+  info.push(rndClr((name ?? " ").padStart(11)));
   info.push(
-    chalk.yellowBright(timeLeft.toString().padStart(3)) +
+    chalk.blue(timeLeft.toString().padStart(3)) +
       "/" +
       chalk.yellow(totalTime.toString().padEnd(3))
   );
+  info.push(chalk.green(unit.id));
 
   return info.join(" ");
 };
 
 export const tableMap = (
   table: UnitTable | ProcessTable | BlockTable,
-  options: { logInactiveProcesses: boolean }
+  options: { logInactiveProcesses?: boolean } = { logInactiveProcesses: false }
 ) => {
   // if (typeof table === typeof UnitTable)
   const result = [];

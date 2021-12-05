@@ -1,4 +1,6 @@
+import chalk from "chalk";
 import { pp } from "../tools/prettyPrint";
+import { clog } from "../tools/utils";
 import { BlockTable } from "../types/tables";
 import Entity, { BaseEntityProps } from "./entity";
 import Process from "./process";
@@ -47,7 +49,13 @@ export default abstract class Block extends Entity {
   checkQueue = (queue: Queue) => {
     const unit = queue.shift();
     if (!unit) return;
-    console.log(`I've got a ${unit.id} from queue`);
+    clog(
+      chalk.white(
+        `[Q] Block ${chalk.yellow(this.id)} got a ${chalk.green(
+          unit.id
+        )} from queue`
+      )
+    );
 
     this.decideProcess(unit);
   };
@@ -79,7 +87,7 @@ export default abstract class Block extends Entity {
   };
 
   transferSomewhere = (unit: Unit) => {
-    console.log("where should i transfer " + pp.unit(unit) + "?");
+    clog(chalk.white("Where should i transfer " + pp.unit(unit) + "?"));
     this.decideTransfer(unit)?.push(unit);
   };
 }
