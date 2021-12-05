@@ -8,6 +8,7 @@ const randomColors = [
   chalk.yellow,
   // chalk.black,
   // chalk.blueBright,
+  chalk.magenta,
   chalk.cyan,
   chalk.green,
   chalk.white,
@@ -21,12 +22,12 @@ const rndClr = (str: string = "") => {
     let ri = Math.floor(Math.random() * randomColors.length);
     colorTable[str] = randomColors[ri];
   }
-  return chalk.bgBlackBright(colorTable[str](str));
+  return chalk(colorTable[str](str));
 };
 
 const block = ({ id, name, process, status }: Block) => {
   const info = [chalk.greenBright("Block  ")];
-  info.push(rndClr(id).padStart(6));
+  info.push(chalk.bgBlack(rndClr(id).padStart(6)));
   info.push(chalk.green(name).padStart(8));
   info.push(chalk.blue(process?.name ?? " ").padStart(20));
   info.push((status === "idle" ? chalk.gray : chalk.greenBright)(status));
@@ -35,16 +36,20 @@ const block = ({ id, name, process, status }: Block) => {
 
 const unit = ({ id, state }: Unit) => {
   const info = [chalk.magenta("Unit  ")];
-  info.push(rndClr(id));
+  info.push(chalk.bgBlack(rndClr(id)));
   info.push(chalk.greenBright(state));
   return info.join(" ");
 };
 
-const process = ({ id, name, status, timeLeft, unit }: Process) => {
+const process = ({ id, name, status, timeLeft, unit, totalTime }: Process) => {
   const info = [chalk.blue("Process")];
-  info.push(rndClr(id));
-  info.push(chalk.blue(name ?? " ").padStart(20));
-  info.push(chalk.yellowBright(timeLeft).padStart(3));
+  info.push(chalk.bgBlack(rndClr(id)));
+  info.push(rndClr((name ?? " ").padStart(22)));
+  info.push(
+    chalk.yellowBright(timeLeft.toString().padStart(3)) +
+      "/" +
+      chalk.yellow(totalTime.toString().padEnd(3))
+  );
 
   return info.join(" ");
 };

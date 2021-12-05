@@ -12,7 +12,12 @@ import { clog } from "./tools/utils";
 import { ProcessTable, BlockTable } from "./types/tables";
 
 const argv = initArgs(argvOptions);
+const { id_length } = argv;
 export type Argv = typeof argv;
+
+export const GLOBAL_OPTIONS = {
+  id_length,
+};
 
 const main = () => {
   const handlerQueue: Queue = [];
@@ -26,9 +31,9 @@ const main = () => {
   const tables = { processTable, blockTable, unitTable };
   const queues = { handlerQueue, builderQueue, finishQueue };
 
-  Block.init({ blockTable });
-  Process.init({ processTable });
-  Unit.init({ unitTable });
+  Block.init({ table: blockTable, GLOBAL_OPTIONS });
+  Process.init({ table: processTable, GLOBAL_OPTIONS });
+  Unit.init({ table: unitTable, GLOBAL_OPTIONS });
 
   const U1 = new Unit();
 
@@ -48,17 +53,20 @@ const main = () => {
 
   console.log("Blocks");
   // for (let t = 0; t < 30; t++) {
-  while (finishQueue.length !== Unit.unitTable.size) {
-    console.log(queues);
-    for (const [processID, process] of Process.processTable) {
-      // clog(pp.process(process));
+  let t = 0;
+  while (finishQueue.length !== Unit.table.size) {
+    // console.log(queues);
+    console.log(t);
+    for (const [processID, process] of Process.table) {
       process.step();
+      if (process.status === "processing") clog(pp.process(process));
     }
 
-    for (const [blockID, block] of Block.blockTable) {
-      clog(pp.block(block));
+    for (const [blockID, block] of Block.table) {
       block.step();
+      // clog(pp.block(block));
     }
+    t++;
   }
 };
 

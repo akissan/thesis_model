@@ -1,21 +1,22 @@
+import { GLOBAL_OPTIONS } from "..";
 import { pp } from "../tools/prettyPrint";
 import { uid } from "../tools/utils";
 import { BlockTable } from "../types/tables";
 import { builderAcceptedResponseStates } from "./blocks/builder";
+import Entity, { BaseEntityProps } from "./entity";
 import Process from "./process";
 import { Queue } from "./queue";
 import { ResponseState } from "./response";
 import Unit from "./unit";
 
-export type BaseBlockProps = {
+export type BaseBlockProps = BaseEntityProps & {
   name: Block["name"];
   inputQueue: Block["inputQueue"];
   outputQueue: Block["outputQueue"];
 };
 export type BlockID = string;
 
-export default abstract class Block {
-  id: BlockID;
+export default abstract class Block extends Entity {
   name: string;
   private _process?: Process;
   status: "processing" | "idle";
@@ -25,20 +26,14 @@ export default abstract class Block {
   abstract assignProcess: (unit: Unit) => Process | undefined;
   abstract decideTransfer: (unit: Unit) => Queue | undefined;
 
-  static blockTable: BlockTable;
+  static table: BlockTable;
 
-  static init = ({ blockTable }: { blockTable: typeof Block.blockTable }) => {
-    this.blockTable = blockTable;
-  };
-
-  constructor({ name, inputQueue, outputQueue }: BaseBlockProps) {
-    this.id = uid();
+  constructor({ name, inputQueue, outputQueue, id }: BaseBlockProps) {
+    super({ id });
     this.name = name;
     this.status = "idle";
     this.inputQueue = inputQueue;
     this.outputQueue = outputQueue;
-
-    Block.blockTable.set(this.id, this);
   }
 
   step = () => {
@@ -56,6 +51,7 @@ export default abstract class Block {
   };
 
   onProcessFinish = (process: Process) => {
+    this.process = undefined;
     this.decideProcess(process.unit);
   };
 
@@ -71,9 +67,11 @@ export default abstract class Block {
 
   decideProcess = (unit: Unit) => {
     if (this.shouldStay(unit)) {
-      this.process = this.assignProcess(unit);
+      const process = this.assignProcess(unit);
+      if (process?.parentBlock === this) {
+        this.process = process;
+      }
     } else {
-      this.process = undefined;
       this.transferSomewhere(unit);
     }
   };

@@ -3,11 +3,11 @@ import yargs, { Argv } from "yargs";
 export const argvOptions =
   // : Record<string, yargs.Options>
   {
-    title: {
-      type: "string",
-      alias: "n",
-      describe: "New note title",
-      group: "New note",
+    id_length: {
+      type: "number",
+      alias: "u",
+      describe: "ID length",
+      group: "Minor",
     },
     category: {
       type: "string",

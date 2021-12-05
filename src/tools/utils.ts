@@ -2,8 +2,8 @@ import chalk from "chalk";
 import crypto from "crypto";
 import { inspect } from "util";
 
-export const uid = () => {
-  return crypto.randomBytes(3).toString("hex");
+export const uid = (uid_length: number = 3) => {
+  return crypto.randomBytes(uid_length).toString("hex");
 };
 
 export const logError = (err: unknown) => {

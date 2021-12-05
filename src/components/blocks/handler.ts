@@ -1,3 +1,4 @@
+import { PROCESS_TIMES } from "../../parameters";
 import { pp } from "../../tools/prettyPrint";
 import Block, { BaseBlockProps } from "../block";
 import Process from "../process";
@@ -13,7 +14,6 @@ export const handlerAcceptedResponseStates = [
   "cached",
   "readed",
   "crafted",
-  "builded",
 ] as const;
 
 export default class HandlerBlock extends Block {
@@ -34,43 +34,49 @@ export default class HandlerBlock extends Block {
       case "new":
         return new Process({
           name: "Connection",
-          timeLeft: 4,
+          timeLeft: PROCESS_TIMES.connection,
           unit,
           parentBlock: this,
-          onFinish: (process) => {
-            process.unit.state = "connected";
+          options: {
+            finish: {
+              state: "connected",
+            },
           },
         });
       case "connected":
         return new Process({
           name: "Parsing",
-          timeLeft: 5,
+          timeLeft: PROCESS_TIMES.parsing,
           unit,
           parentBlock: this,
-          onFinish: (process) => {
-            process.unit.state = "not_cached";
+          options: {
+            finish: {
+              state: "not_cached",
+            },
           },
         });
       case "cached":
         return new Process({
           name: "Crafting",
-          timeLeft: 2,
+          timeLeft: PROCESS_TIMES.response_crafting,
           unit,
           parentBlock: this,
-          onFinish: (process) => {
-            process.unit.state = "crafted";
+          options: {
+            finish: {
+              state: "crafted",
+            },
           },
         });
-      // default:
-      //   break;
       case "crafted":
         return new Process({
           name: "Sending",
-          timeLeft: 5,
+          timeLeft: PROCESS_TIMES.sending,
           unit,
           parentBlock: this,
-          onFinish: (process) => {
-            process.unit.state = "sended";
+          options: {
+            finish: {
+              state: "sended",
+            },
           },
         });
     }

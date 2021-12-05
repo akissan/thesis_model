@@ -4,17 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc-watch",
     "build": "tsc",
-    "start": "node build/index.js"
+    "dev": "tsc-watch",
+    "start": "node build/index.js",
+    "dev:active": "tsc-watch --onSuccess \"npm run start\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bin": {
-    "atm": "./build/index.js"
-  },
   "dependencies": {
     "chalk": "^4.1.2",
     "tsc-watch": "^4.5.0",

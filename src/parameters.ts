@@ -1,30 +1,18 @@
-const SIM_TIME = 50;
+const MAX_SIM_TIME = 50;
 
 const BUILDER_COUNT = 2;
 const HANLDERS_COUNT = 4;
 
-const eventTimings = {
-  connection_time: {
-    time: 4,
-  },
-  request_handling: {
-    time: 3,
-  },
-  build_time: {
-    time: 12,
-  },
-  api_calls: {
-    time: 2,
-  },
-  read_from_cache: {
-    time: 1,
-  },
-  response_crafting: {
-    time: 2,
-  },
-  response_receiving: {
-    time: 4,
-  },
-};
+const PROCESS_TIMES = {
+  connection: 3,
+  parsing: 14,
+  reading_from_cache: 2,
+  writing_to_cache: 3,
+  building_start: 4,
+  api_call: 3,
+  building_end: 2,
+  sending: 7,
+  response_crafting: 3,
+} as const;
 
-export { BUILDER_COUNT, HANLDERS_COUNT, SIM_TIME, eventTimings };
+export { BUILDER_COUNT, HANLDERS_COUNT, MAX_SIM_TIME, PROCESS_TIMES };

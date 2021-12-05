@@ -1,24 +1,18 @@
 import { uid } from "../tools/utils";
+import Entity, { BaseEntityProps } from "./entity";
 import { ResponseState } from "./response";
 
-export type UnitID = string;
+export type UnitID = Unit["id"];
 
 export type UnitTable = Map<UnitID, Unit>;
 
-export default class Unit {
-  id: UnitID;
+export default class Unit extends Entity {
   state: ResponseState;
 
-  static unitTable: UnitTable;
+  static table: UnitTable;
 
-  static init = ({ unitTable }: { unitTable: typeof Unit.unitTable }) => {
-    Unit.unitTable = unitTable;
-  };
-
-  constructor() {
-    this.id = uid();
+  constructor(props?: BaseEntityProps) {
+    super({ ...props });
     this.state = "new";
-
-    Unit.unitTable.set(this.id, this);
   }
 }

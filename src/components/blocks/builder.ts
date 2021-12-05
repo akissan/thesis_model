@@ -1,3 +1,4 @@
+import { PROCESS_TIMES } from "../../parameters";
 import { pp } from "../../tools/prettyPrint";
 import Block, { BaseBlockProps } from "../block";
 import Process from "../process";
@@ -8,7 +9,9 @@ import { handlerAcceptedResponseStates } from "./handler";
 
 export const builderAcceptedResponseStates = [
   "not_cached",
-  "api_called",
+  "prebuilded",
+  "hydrated",
+  "builded",
 ] as const;
 
 export default class BuilderBlock extends Block {
@@ -23,14 +26,62 @@ export default class BuilderBlock extends Block {
   }
 
   assignProcess = (unit: Unit): Process | undefined => {
-    if ((unit.state as BuilderAcceptedResponseStates) == "not_cached") {
+    const state = unit.state as BuilderAcceptedResponseStates;
+
+    if (state === "not_cached") {
       return new Process({
-        name: "Caching",
-        timeLeft: 2,
+        name: "Prebuilding",
+        timeLeft: PROCESS_TIMES.building_start,
         unit,
         parentBlock: this,
+        options: {
+          finish: {
+            state: "prebuilded",
+          },
+        },
+      });
+    }
+
+    if (state === "prebuilded") {
+      return new Process({
+        name: "Hydration",
+        timeLeft: PROCESS_TIMES.api_call,
+        unit,
+        options: {
+          finish: {
+            state: "hydrated",
+          },
+        },
         onFinish: (process) => {
-          process.unit.state = "cached";
+          this.inputQueue.push(process.unit);
+        },
+      });
+    }
+
+    if (state === "hydrated") {
+      return new Process({
+        name: "Building",
+        timeLeft: PROCESS_TIMES.building_end,
+        unit,
+        parentBlock: this,
+        options: {
+          finish: {
+            state: "builded",
+          },
+        },
+      });
+    }
+
+    if (state === "builded") {
+      return new Process({
+        name: "Caching",
+        timeLeft: PROCESS_TIMES.writing_to_cache,
+        unit,
+        parentBlock: this,
+        options: {
+          finish: {
+            state: "cached",
+          },
         },
       });
     }
