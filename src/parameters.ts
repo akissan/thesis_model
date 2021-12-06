@@ -1,7 +1,8 @@
 const MAX_SIM_TIME = 50;
 
-const BUILDER_COUNT = 2;
+const INITIAL_UNIT_COUNT = 4;
 const HANLDERS_COUNT = 4;
+const BUILDER_COUNT = 6;
 
 const PROCESS_TIMES = {
   connection: 3,
@@ -15,4 +16,10 @@ const PROCESS_TIMES = {
   response_crafting: 3,
 } as const;
 
-export { BUILDER_COUNT, HANLDERS_COUNT, MAX_SIM_TIME, PROCESS_TIMES };
+export {
+  INITIAL_UNIT_COUNT,
+  BUILDER_COUNT,
+  HANLDERS_COUNT,
+  MAX_SIM_TIME,
+  PROCESS_TIMES,
+};

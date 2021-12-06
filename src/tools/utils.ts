@@ -16,4 +16,9 @@ export const logError = (err: unknown) => {
   // }
 };
 
+export const Repeat = (
+  n: number,
+  callback: Parameters<typeof Array["prototype"]["forEach"]>[0]
+) => [...Array(n)].forEach(callback);
+
 export const clog = console.log;
