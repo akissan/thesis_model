@@ -1,10 +1,12 @@
+import { Statserver } from "../statserver";
 import { ProcessTable } from "../types/tables";
 import Block from "./block";
 import Entity, { BaseEntityProps } from "./entity";
 import { ResponseState } from "./response";
 import Unit from "./unit";
 
-export type ProcessID = string;
+export type ProcessID = Process["id"];
+
 type BaseProcessProps = BaseEntityProps & {
   timeLeft: Process["timeLeft"];
   unit: Process["unit"];
@@ -54,6 +56,7 @@ export default class Process extends Entity {
     this.totalTime = timeLeft;
 
     Process.table.set(this.id, this);
+    Statserver.reportProcessChange({ processID: this.id, unitID: unit.id });
   }
 
   baseFinish = (process: Process) => {

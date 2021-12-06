@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { Statserver } from "../statserver";
 import { pp } from "../tools/prettyPrint";
 import { clog } from "../tools/utils";
 import { BlockTable } from "../types/tables";
@@ -13,7 +14,8 @@ export type BaseBlockProps = BaseEntityProps & {
   inputQueue: Block["inputQueue"];
   outputQueue: Block["outputQueue"];
 };
-export type BlockID = string;
+
+export type BlockID = Block["id"];
 
 export default abstract class Block extends Entity {
   name: string;
@@ -72,6 +74,9 @@ export default abstract class Block extends Entity {
   }
   set process(p: Block["_process"]) {
     this._process = p;
+    if (p) {
+      Statserver.reportTravel({ unitID: p.unit.id, entityID: this.id });
+    }
     this.status = p === undefined ? "idle" : "processing";
   }
 

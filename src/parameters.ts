@@ -1,8 +1,8 @@
 const MAX_SIM_TIME = 50;
 
-const INITIAL_UNIT_COUNT = 4;
-const HANLDERS_COUNT = 4;
-const BUILDER_COUNT = 6;
+const INITIAL_UNIT_COUNT = 1;
+const HANLDERS_COUNT = 1;
+const BUILDER_COUNT = 1;
 
 const PROCESS_TIMES = {
   connection: 3,
@@ -12,8 +12,8 @@ const PROCESS_TIMES = {
   building_start: 4,
   api_call: 4,
   building_end: 2,
-  sending: 7,
   response_crafting: 3,
+  sending: 5,
 } as const;
 
 export {

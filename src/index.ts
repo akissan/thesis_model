@@ -13,6 +13,7 @@ import {
   HANLDERS_COUNT,
   INITIAL_UNIT_COUNT,
 } from "./parameters";
+import { Statserver } from "./statserver";
 import { argvOptions, initArgs } from "./tools/argv";
 import { pp, tableMap } from "./tools/prettyPrint";
 import { clog, Repeat } from "./tools/utils";
@@ -49,10 +50,11 @@ const clogCurrentTables = ({
 };
 
 const main = () => {
-  const handlerQueue: Queue = new Queue();
-  const builderQueue: Queue = new Queue();
+  const handlerQueue: Queue = new Queue({ options: { id: "H_QUEUE" } });
+  const builderQueue: Queue = new Queue({ options: { id: "B_QUEUE" } });
   const finishQueue: Queue = new Queue({
     options: {
+      id: "F_QUEUE",
       onPush: (unit) =>
         clog(chalk.white(`[F] Unit ${chalk.yellow(unit.id)} finished!`)),
     },
@@ -126,13 +128,24 @@ const main = () => {
     });
 
     t++;
+    Statserver.tick();
   }
 
-  console.log(
-    chalk.bgWhite.black("-".repeat(32) + " FINISH " + "-".repeat(32))
-  );
+  clog(chalk.bgWhite.black("-".repeat(32) + " FINISH " + "-".repeat(32)));
   Unit.table.forEach((unit) => clog(pp.unit(unit)));
   Block.table.forEach((block) => clog(pp.block(block)));
+
+  console.dir(Statserver.event_table, { depth: 4 });
+
+  Statserver.event_table.processMap.byUnit["UNIT_0"].forEach(
+    ({ processID, time }) => {
+      clog(
+        chalk.yellow(time.toString().padStart(2)) +
+          " " +
+          chalk.blue(Process.table.get(processID)?.name)
+      );
+    }
+  );
 };
 
 main();

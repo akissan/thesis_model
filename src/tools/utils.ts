@@ -22,3 +22,6 @@ export const Repeat = (
 ) => [...Array(n)].forEach(callback);
 
 export const clog = console.log;
+
+export const randomItem = <T>(arr: Array<T>) =>
+  arr[Math.floor(Math.random() * arr.length)];

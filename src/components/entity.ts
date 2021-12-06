@@ -5,6 +5,8 @@ export type BaseEntityProps = {
   id?: Entity["id"];
 };
 
+export type EntityID = Entity["id"];
+
 export default class Entity {
   id: string;
 
