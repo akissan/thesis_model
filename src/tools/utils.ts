@@ -1,6 +1,11 @@
 import chalk from "chalk";
 import crypto from "crypto";
 import { inspect } from "util";
+// import { tableMap } from "..";s
+
+import { UnitTable } from "../components/unit";
+import { BlockTable, ProcessTable } from "../types/tables";
+// import { tableMap } from "./tableMap";
 
 export const uid = (uid_length: number = 3) => {
   return crypto.randomBytes(uid_length).toString("hex");

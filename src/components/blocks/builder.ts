@@ -2,7 +2,7 @@ import { PROCESS_TIMES } from "../../parameters";
 import { pp } from "../../tools/prettyPrint";
 import Block, { BaseBlockProps } from "../block";
 import Process from "../process";
-import { Queue } from "../queue";
+import Queue from "../queue";
 import { BuilderAcceptedResponseStates } from "../response";
 import Unit from "../unit";
 import { handlerAcceptedResponseStates } from "./handler";

@@ -3,6 +3,7 @@ import Block from "../components/block";
 import Process from "../components/process";
 import Unit, { UnitTable } from "../components/unit";
 import { BlockTable, ProcessTable } from "../types/tables";
+import { clog } from "./utils";
 
 const randomColors = [
   // chalk.greenBright,
@@ -64,7 +65,6 @@ export const tableMap = (
   table: UnitTable | ProcessTable | BlockTable,
   options: { logInactiveProcesses?: boolean } = { logInactiveProcesses: false }
 ) => {
-  // if (typeof table === typeof UnitTable)
   const result = [];
   for (const [_, entity] of table) {
     if (entity instanceof Unit) {
@@ -82,6 +82,39 @@ export const tableMap = (
     }
   }
   return result.length > 0 ? result.join("\n") : "Table is empty";
+};
+
+export type clogCurrentTablesOptions = {
+  logInactiveProcesses?: boolean;
+  logBlocks?: boolean;
+  logProcesses?: boolean;
+  logUnits?: boolean;
+};
+
+export const clogTables = (
+  {
+    blockTable,
+    processTable,
+    unitTable,
+  }: {
+    blockTable?: BlockTable;
+    processTable?: ProcessTable;
+    unitTable?: UnitTable;
+  },
+  {
+    logBlocks = true,
+    logUnits = true,
+    logProcesses = true,
+    logInactiveProcesses = undefined,
+  }: clogCurrentTablesOptions = {}
+) => {
+  const options = { logInactiveProcesses };
+  if (blockTable && logBlocks)
+    clog(chalk.greenBright("Blocks:\n") + tableMap(blockTable, options));
+  if (processTable && logProcesses)
+    clog(chalk.blueBright("Processes: \n") + tableMap(processTable, options));
+  if (unitTable && logUnits)
+    clog(chalk.magentaBright("Units: \n") + tableMap(unitTable, options));
 };
 
 export const pp = { block, unit, process };

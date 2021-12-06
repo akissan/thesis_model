@@ -19,6 +19,4 @@ export default class Unit extends Entity {
 
     Unit.table.set(this.id, this);
   }
-
-  // Unit.table.set(this.id, this);
 }

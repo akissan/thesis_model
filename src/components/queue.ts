@@ -3,8 +3,6 @@ import { uid } from "../tools/utils";
 import Entity from "./entity";
 import Unit from "./unit";
 
-// export type Queue = Unit[];
-
 export type QueueProps = {
   list?: Unit[];
   options?: {
@@ -15,7 +13,7 @@ export type QueueProps = {
 
 export type QueueID = Queue["id"];
 
-export class Queue extends Array {
+export default class Queue extends Array {
   onPush?: (unit: Unit) => void;
   id: Entity["id"];
 

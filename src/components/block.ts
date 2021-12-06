@@ -5,7 +5,7 @@ import { clog } from "../tools/utils";
 import { BlockTable } from "../types/tables";
 import Entity, { BaseEntityProps } from "./entity";
 import Process from "./process";
-import { Queue } from "./queue";
+import Queue from "./queue";
 import { ResponseState } from "./response";
 import Unit from "./unit";
 
