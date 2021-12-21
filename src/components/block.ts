@@ -51,13 +51,14 @@ export default abstract class Block extends Entity {
   checkQueue = (queue: Queue) => {
     const unit = queue.shift();
     if (!unit) return;
-    clog(
-      chalk.white(
-        `[Q] Block ${chalk.yellow(this.id)} got a ${chalk.green(
-          unit.id
-        )} from queue`
-      )
-    );
+    if (global.VERBOSE)
+      clog(
+        chalk.white(
+          `[Q] Block ${chalk.yellow(this.id)} got a ${chalk.green(
+            unit.id
+          )} from queue`
+        )
+      );
 
     this.decideProcess(unit);
   };
@@ -92,7 +93,8 @@ export default abstract class Block extends Entity {
   };
 
   transferSomewhere = (unit: Unit) => {
-    clog(chalk.white("Where should i transfer " + pp.unit(unit) + "?"));
+    if (global.VERBOSE)
+      clog(chalk.white("Where should i transfer " + pp.unit(unit) + "?"));
     this.decideTransfer(unit)?.push(unit);
   };
 }

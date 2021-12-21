@@ -1,10 +1,21 @@
-const MAX_SIM_TIME = 50;
+export const MAX_SIM_TIME = 500;
 
-const INITIAL_UNIT_COUNT = 1;
-const HANLDERS_COUNT = 1;
-const BUILDER_COUNT = 1;
+export const INITIAL_UNIT_COUNT = 1;
+export const BASE_REQUEST_RATE = 8;
+export const REQUEST_BLUR = 7;
 
-const PROCESS_TIMES = {
+// export const UNIT_SPAWN_RATE = {
+//   MIN_TICK: 0,
+//   MAX_TICK: 8,
+// };
+// export const PAGE_COUNT = 8;
+// export const CACHE_SIZE = 10;
+// export const CACHE_STRATEGY = "RANDOM";[]
+
+export const HANLDERS_COUNT = 6;
+export const BUILDER_COUNT = 4;
+
+export const PROCESS_TIMES = {
   connection: 3,
   parsing: 2,
   reading_from_cache: 2,
@@ -15,11 +26,3 @@ const PROCESS_TIMES = {
   response_crafting: 3,
   sending: 5,
 } as const;
-
-export {
-  INITIAL_UNIT_COUNT,
-  BUILDER_COUNT,
-  HANLDERS_COUNT,
-  MAX_SIM_TIME,
-  PROCESS_TIMES,
-};

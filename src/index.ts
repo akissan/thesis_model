@@ -4,22 +4,20 @@ import chalk from "chalk";
 import Block from "./components/block";
 import Entity from "./components/entity";
 import Process from "./components/process";
-import Queue from "./components/queue";
-import Unit, { UnitTable } from "./components/unit";
+import Unit from "./components/unit";
 import init from "./init";
 import {
-  INITIAL_UNIT_COUNT,
-  HANLDERS_COUNT,
   BUILDER_COUNT,
+  HANLDERS_COUNT,
+  INITIAL_UNIT_COUNT,
 } from "./parameters";
 import { Statserver } from "./statserver";
 import { argvOptions, initArgs } from "./tools/argv";
 import { clogTables, pp } from "./tools/prettyPrint";
 import { clog } from "./tools/utils";
-import { BlockTable, ProcessTable } from "./types/tables";
 
 const argv = initArgs(argvOptions);
-const { id_length } = argv;
+const { id_length, builders, handlers, units } = argv;
 export type Argv = typeof argv;
 
 export const GLOBAL_OPTIONS = {
@@ -37,15 +35,15 @@ const main = () => {
     { block: Block, process: Process, unit: Unit }
   );
 
-  init.spawnUnits(INITIAL_UNIT_COUNT);
+  init.spawnUnits(units ?? INITIAL_UNIT_COUNT);
 
-  init.spawnHandlers(HANLDERS_COUNT, {
+  init.spawnHandlers(handlers ?? HANLDERS_COUNT, {
     builderQueue,
     finishQueue,
     handlerQueue,
   });
 
-  init.spawnBuilders(BUILDER_COUNT, {
+  init.spawnBuilders(builders ?? BUILDER_COUNT, {
     builderQueue,
     handlerQueue,
   });
@@ -60,33 +58,38 @@ const main = () => {
     unitTable: Unit.table,
   });
   let t = 0;
+
+  const simStartTime = performance.now();
+  // console.time("SIMTIME");
   while (finishQueue.length !== Unit.table.size) {
-    clog(chalk.yellow.bold(`${"-".repeat(32)} ${t}  ${"-".repeat(32)}`));
+    if (global.VERBOSE)
+      clog(chalk.yellow.bold(`${"-".repeat(32)} ${t}  ${"-".repeat(32)}`));
 
     for (const [_, process] of Process.table) process.step();
     for (const [_, block] of Block.table) block.step();
 
-    clogTables(
-      {
-        blockTable: Block.table,
-        processTable: Process.table,
-        unitTable: Unit.table,
-      },
-      {
-        logBlocks: true,
-        logProcesses: true,
-        logUnits: true,
-      }
-    );
+    if (global.VERBOSE)
+      clogTables(
+        {
+          blockTable: Block.table,
+          processTable: Process.table,
+          unitTable: Unit.table,
+        },
+        {
+          logUnits: false,
+        }
+      );
 
     t++;
     Statserver.tick();
   }
+  const simEndTime = performance.now();
 
   clog(chalk.bgWhite.black(`${"-".repeat(32)} FINISH  ${"-".repeat(32)}`));
   Unit.table.forEach((unit) => clog(pp.unit(unit)));
   Block.table.forEach((block) => clog(pp.block(block)));
   console.dir(Statserver.event_table, { depth: 4 });
+  clog(`SIMTIME: ${simEndTime - simStartTime} ms`);
 };
 
 main();

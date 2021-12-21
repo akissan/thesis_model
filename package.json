@@ -1,5 +1,5 @@
 {
-  "name": "cli_notes",
+  "name": "supamodel",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -9,6 +9,7 @@
     "start": "node build/index.js",
     "dev:active": "tsc-watch --onSuccess \"npm run start\""
   },
+  "bin": "./build/index.js",
   "keywords": [],
   "author": "",
   "license": "ISC",

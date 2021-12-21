@@ -29,9 +29,9 @@ const rndClr = (str: string = "") => {
 
 const block = ({ id, name, process, status }: Block) => {
   const info = [chalk.greenBright("Block  ")];
-  info.push(chalk.bgBlack(rndClr(id).padStart(6)));
+  info.push(chalk.bgBlack(rndClr(id.toString().padStart(9))));
   info.push(chalk.green(name).padStart(8));
-  info.push(chalk.blue(process?.name ?? " ").padStart(20));
+  info.push(chalk.blue(process?.name ?? " ").padStart(21));
   info.push((status === "idle" ? chalk.gray : chalk.greenBright)(status));
 
   if (process?.unit) {
@@ -42,14 +42,14 @@ const block = ({ id, name, process, status }: Block) => {
 
 const unit = ({ id, state }: Unit) => {
   const info = [chalk.magenta("Unit   ")];
-  info.push(chalk.bgBlack(rndClr(id).padStart(6)));
+  info.push(chalk.bgBlack(rndClr(id.toString().padStart(9))));
   info.push(chalk.greenBright(state));
   return info.join(" ");
 };
 
 const process = ({ id, name, status, timeLeft, unit, totalTime }: Process) => {
   const info = [chalk.blue("Process")];
-  info.push(chalk.bgBlack(rndClr(id)));
+  info.push(chalk.bgBlack(rndClr(id).toString().padStart(9)));
   info.push(rndClr((name ?? " ").padStart(11)));
   info.push(
     chalk.blue(timeLeft.toString().padStart(3)) +

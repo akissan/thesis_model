@@ -14,8 +14,10 @@ const initQueues = () => {
   const finishQueue: Queue = new Queue({
     options: {
       id: "F_QUEUE",
-      onPush: (unit) =>
-        clog(chalk.white(`[F] Unit ${chalk.yellow(unit.id)} finished!`)),
+      onPush: global.VERBOSE
+        ? (unit) =>
+            clog(chalk.white(`[F] Unit ${chalk.yellow(unit.id)} finished!`))
+        : undefined,
     },
   });
   return { handlerQueue, builderQueue, finishQueue } as const;
