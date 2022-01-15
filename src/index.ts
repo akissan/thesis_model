@@ -4,6 +4,7 @@ import chalk from "chalk";
 import Block from "./components/block";
 import Entity from "./components/entity";
 import Process from "./components/process";
+import { Schedule } from "./components/schedule";
 import Unit from "./components/unit";
 import init from "./init";
 import {
@@ -28,6 +29,8 @@ const main = () => {
   const { builderQueue, finishQueue, handlerQueue } = init.queues();
   const { blockTable, processTable, unitTable } = init.tables();
 
+  const schedule = new Schedule();
+
   Entity.init({ ...GLOBAL_OPTIONS });
 
   init.assignTables(
@@ -41,11 +44,13 @@ const main = () => {
     builderQueue,
     finishQueue,
     handlerQueue,
+    schedule,
   });
 
   init.spawnBuilders(builders ?? BUILDER_COUNT, {
     builderQueue,
     handlerQueue,
+    schedule,
   });
 
   Unit.table.forEach((Unit) => {
@@ -65,8 +70,8 @@ const main = () => {
     if (global.VERBOSE)
       clog(chalk.yellow.bold(`${"-".repeat(32)} ${t}  ${"-".repeat(32)}`));
 
-    for (const [_, process] of Process.table) process.step();
-    for (const [_, block] of Block.table) block.step();
+    let delta = schedule.step();
+    // for (const [_, process] of Process.table) process.step();
 
     if (global.VERBOSE)
       clogTables(
@@ -80,8 +85,8 @@ const main = () => {
         }
       );
 
-    t++;
-    Statserver.tick();
+    t += delta;
+    Statserver.tick(delta);
   }
   const simEndTime = performance.now();
 

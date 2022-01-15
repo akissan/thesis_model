@@ -1,8 +1,8 @@
-export const MAX_SIM_TIME = 500;
+export const MAX_SIM_TIME = 500000;
 
-export const INITIAL_UNIT_COUNT = 1;
-export const BASE_REQUEST_RATE = 8;
-export const REQUEST_BLUR = 7;
+export const INITIAL_UNIT_COUNT = 2;
+// export const BASE_REQUEST_RATE = 8;
+// export const REQUEST_BLUR = 7;
 
 // export const UNIT_SPAWN_RATE = {
 //   MIN_TICK: 0,
@@ -12,8 +12,8 @@ export const REQUEST_BLUR = 7;
 // export const CACHE_SIZE = 10;
 // export const CACHE_STRATEGY = "RANDOM";[]
 
-export const HANLDERS_COUNT = 6;
-export const BUILDER_COUNT = 4;
+export const HANLDERS_COUNT = 2;
+export const BUILDER_COUNT = 2;
 
 export const PROCESS_TIMES = {
   connection: 3,

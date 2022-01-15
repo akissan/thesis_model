@@ -3,6 +3,7 @@ import { ProcessTable } from "../types/tables";
 import Block from "./block";
 import Entity, { BaseEntityProps } from "./entity";
 import { ResponseState } from "./response";
+import { Schedule } from "./schedule";
 import Unit from "./unit";
 
 export type ProcessID = Process["id"];
@@ -41,9 +42,11 @@ export default class Process extends Entity {
     parentBlock,
     options,
     id,
+    schedule,
   }: BaseProcessProps & {
     onFinish?: Process["onFinish"];
     options?: Process["options"];
+    schedule: Schedule;
   }) {
     super({ id });
     this.status = "processing";
@@ -57,6 +60,7 @@ export default class Process extends Entity {
 
     Process.table.set(this.id, this);
     Statserver.reportProcessChange({ processID: this.id, unitID: unit.id });
+    schedule.pushProcess(this);
   }
 
   baseFinish = (process: Process) => {
@@ -66,14 +70,17 @@ export default class Process extends Entity {
     process.parentBlock?.onProcessFinish(process);
   };
 
+  finishProcess = () => {
+    this.timeLeft = 0;
+    this.status = "finished";
+    this.onFinish?.(this);
+    this.baseFinish(this);
+  };
+
   step = () => {
     if (this.status === "processing") {
       this.timeLeft--;
-      if (this.timeLeft <= 0) {
-        this.status = "finished";
-        this.onFinish?.(this);
-        this.baseFinish(this);
-      }
+      if (this.timeLeft <= 0) this.finishProcess();
     }
   };
 }

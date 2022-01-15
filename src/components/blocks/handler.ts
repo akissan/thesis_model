@@ -28,8 +28,9 @@ export default class HandlerBlock extends Block {
     this.outputQueue = props.outputQueue;
   }
 
-  assignProcess = (unit: Unit): Process | undefined => {
+  decideProcess = (unit: Unit): Process => {
     const state = unit.state as HandlerAcceptedResponseStates;
+    const schedule = this.schedule;
 
     switch (state) {
       case "new":
@@ -43,6 +44,7 @@ export default class HandlerBlock extends Block {
               state: "connected",
             },
           },
+          schedule,
         });
       case "connected":
         return new Process({
@@ -55,6 +57,7 @@ export default class HandlerBlock extends Block {
               state: randomItem<ResponseState>(["cached", "not_cached"]),
             },
           },
+          schedule,
         });
       case "cached":
         return new Process({
@@ -67,6 +70,7 @@ export default class HandlerBlock extends Block {
               state: "crafted",
             },
           },
+          schedule,
         });
       case "crafted":
         return new Process({
@@ -79,8 +83,10 @@ export default class HandlerBlock extends Block {
               state: "sended",
             },
           },
+          schedule,
         });
     }
+    throw new Error("Process is not assigned correctly for " + unit);
   };
 
   decideTransfer = (unit: Unit) => {

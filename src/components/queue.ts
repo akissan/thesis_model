@@ -1,5 +1,6 @@
 import { Statserver } from "../statserver";
 import { uid } from "../tools/utils";
+import Block, { BlockID } from "./block";
 import Entity from "./entity";
 import Unit from "./unit";
 
@@ -13,18 +14,42 @@ export type QueueProps = {
 
 export type QueueID = Queue["id"];
 
+export type consumerStates = "available" | "busy";
+
 export default class Queue extends Array {
   onPush?: (unit: Unit) => void;
   id: Entity["id"];
+  consumers: Map<BlockID, consumerStates> = new Map();
 
-  push = (...items: Unit[]) => {
-    super.push(...items);
-    items.forEach((unit) =>
-      Statserver.reportTravel({ unitID: unit.id, entityID: this.id })
-    );
+  setConsumerState = (id: BlockID, state: consumerStates) => {
+    this.consumers.set(id, state);
+    if (state === "available") this.onAvailableConsumer(id);
+  };
 
-    if (this.onPush) items.forEach((item) => this.onPush?.(item));
+  addNewConsumer = (id: BlockID) => {
+    this.consumers.set(id, "available");
+  };
+
+  onAvailableConsumer = (id: BlockID) => {
+    Block.table.get(id)?.tryQueue();
+  };
+
+  push = (unit: Unit) => {
+    super.push(unit);
+    Statserver.reportTravel({ unitID: unit.id, entityID: this.id });
+    this.onPush?.(unit);
+
+    this.getConsumer()?.tryQueue();
+
     return this.length;
+  };
+
+  getConsumer = () => {
+    for (const [blockID, blockState] of this.consumers) {
+      if (blockState === "available") {
+        return Block.table.get(blockID);
+      }
+    }
   };
 
   constructor(

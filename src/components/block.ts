@@ -7,12 +7,14 @@ import Entity, { BaseEntityProps } from "./entity";
 import Process from "./process";
 import Queue from "./queue";
 import { ResponseState } from "./response";
+import { Schedule } from "./schedule";
 import Unit from "./unit";
 
 export type BaseBlockProps = BaseEntityProps & {
   name: Block["name"];
   inputQueue: Block["inputQueue"];
   outputQueue: Block["outputQueue"];
+  schedule: Block["schedule"];
 };
 
 export type BlockID = Block["id"];
@@ -24,23 +26,30 @@ export default abstract class Block extends Entity {
   inputQueue: Queue;
   outputQueue: Record<string, Queue> | Queue;
   abstract allowedOperations: ResponseState[];
-  abstract assignProcess: (unit: Unit) => Process | undefined;
+  abstract decideProcess: (unit: Unit) => Process;
   abstract decideTransfer: (unit: Unit) => Queue | undefined;
+  schedule: Schedule;
 
   static table: BlockTable;
   static setTable = (table: typeof Block.table) => {
     Block.table = table;
   };
 
-  constructor({ name, inputQueue, outputQueue, id }: BaseBlockProps) {
+  constructor({ name, inputQueue, outputQueue, id, schedule }: BaseBlockProps) {
     super({ id });
     this.name = name;
     this.status = "idle";
     this.inputQueue = inputQueue;
     this.outputQueue = outputQueue;
+    this.schedule = schedule;
 
     Block.table.set(this.id, this);
+    this.inputQueue.addNewConsumer(this.id);
   }
+
+  tryQueue = () => {
+    this.checkQueue(this.inputQueue);
+  };
 
   step = () => {
     if (this.status === "idle") {
@@ -59,13 +68,13 @@ export default abstract class Block extends Entity {
           )} from queue`
         )
       );
-
-    this.decideProcess(unit);
+    this.setProcess(this.decideProcess(unit));
   };
 
   onProcessFinish = (process: Process) => {
     this.process = undefined;
-    this.decideProcess(process.unit);
+    this.assignProcess(process.unit);
+    // this.postFinish();
   };
 
   shouldStay = (unit: Unit) => this.allowedOperations.includes(unit.state);
@@ -79,14 +88,23 @@ export default abstract class Block extends Entity {
       Statserver.reportTravel({ unitID: p.unit.id, entityID: this.id });
     }
     this.status = p === undefined ? "idle" : "processing";
+
+    if (this.status === "idle") {
+      this.inputQueue.setConsumerState(this.id, "available");
+    } else {
+      this.inputQueue.setConsumerState(this.id, "busy");
+    }
   }
 
-  decideProcess = (unit: Unit) => {
+  setProcess = (process: Process) => {
+    if (process?.parentBlock === this) {
+      this.process = process;
+    }
+  };
+
+  assignProcess = (unit: Unit) => {
     if (this.shouldStay(unit)) {
-      const process = this.assignProcess(unit);
-      if (process?.parentBlock === this) {
-        this.process = process;
-      }
+      this.setProcess(this.decideProcess(unit));
     } else {
       this.transferSomewhere(unit);
     }

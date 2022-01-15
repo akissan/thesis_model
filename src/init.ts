@@ -4,6 +4,7 @@ import BuilderBlock from "./components/blocks/builder";
 import HandlerBlock from "./components/blocks/handler";
 import Process from "./components/process";
 import Queue from "./components/queue";
+import { Schedule } from "./components/schedule";
 import Unit, { UnitTable } from "./components/unit";
 import { clog, Repeat } from "./tools/utils";
 import { BlockTable, ProcessTable } from "./types/tables";
@@ -64,7 +65,13 @@ const spawnHandlers = (
     handlerQueue,
     builderQueue,
     finishQueue,
-  }: { handlerQueue: Queue; builderQueue: Queue; finishQueue: Queue }
+    schedule,
+  }: {
+    handlerQueue: Queue;
+    builderQueue: Queue;
+    finishQueue: Queue;
+    schedule: Schedule;
+  }
 ) => {
   Repeat(n, (_, idx) => {
     new HandlerBlock({
@@ -72,13 +79,18 @@ const spawnHandlers = (
       name: `handler_${idx}`,
       inputQueue: handlerQueue,
       outputQueue: { builderQueue, finishQueue },
+      schedule,
     });
   });
 };
 
 const spawnBuilders = (
   n: number,
-  { builderQueue, handlerQueue }: { builderQueue: Queue; handlerQueue: Queue }
+  {
+    builderQueue,
+    handlerQueue,
+    schedule,
+  }: { builderQueue: Queue; handlerQueue: Queue; schedule: Schedule }
 ) => {
   Repeat(n, (_, idx) => {
     new BuilderBlock({
@@ -86,6 +98,7 @@ const spawnBuilders = (
       name: `builder_${idx}`,
       inputQueue: builderQueue,
       outputQueue: { handlerQueue },
+      schedule,
     });
   });
 };

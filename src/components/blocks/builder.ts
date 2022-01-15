@@ -25,8 +25,9 @@ export default class BuilderBlock extends Block {
     this.outputQueue = props.outputQueue;
   }
 
-  assignProcess = (unit: Unit): Process | undefined => {
+  decideProcess = (unit: Unit): Process => {
     const state = unit.state as BuilderAcceptedResponseStates;
+    const schedule = this.schedule;
 
     if (state === "not_cached") {
       return new Process({
@@ -39,6 +40,7 @@ export default class BuilderBlock extends Block {
             state: "prebuilded",
           },
         },
+        schedule,
       });
     }
 
@@ -55,6 +57,7 @@ export default class BuilderBlock extends Block {
         onFinish: (process) => {
           this.inputQueue.push(process.unit);
         },
+        schedule,
       });
     }
 
@@ -69,6 +72,7 @@ export default class BuilderBlock extends Block {
             state: "builded",
           },
         },
+        schedule,
       });
     }
 
@@ -83,8 +87,10 @@ export default class BuilderBlock extends Block {
             state: "cached",
           },
         },
+        schedule,
       });
     }
+    throw new Error("Process is not assigned correctly for " + unit);
   };
 
   decideTransfer = (unit: Unit) => {
