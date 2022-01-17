@@ -1,4 +1,4 @@
-import { GLOBAL_OPTIONS } from "..";
+import { GLOBAL_OPTIONS } from "../index.old";
 import { uid } from "../tools/utils";
 import { Schedule } from "./schedule";
 
