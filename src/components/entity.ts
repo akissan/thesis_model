@@ -1,24 +1,17 @@
-import { GLOBAL_OPTIONS } from "../index.old";
 import { uid } from "../tools/utils";
-import { Schedule } from "./schedule";
+import { GlobalManager } from "./globalManager";
 
 export type BaseEntityProps = {
   id?: Entity["id"];
+  globalManager: Entity["globalManager"];
 };
-
-export type EntityID = Entity["id"];
 
 export default class Entity {
   id: string;
+  globalManager: GlobalManager;
 
-  static global_options: typeof GLOBAL_OPTIONS;
-
-  static init = (global_options: typeof Entity.global_options) => {
-    Entity.global_options = global_options;
-  };
-  static schedule: Schedule;
-
-  constructor({ id }: BaseEntityProps) {
-    this.id = id ?? uid(Entity.global_options.id_length);
+  constructor({ id, globalManager }: BaseEntityProps) {
+    this.globalManager = globalManager;
+    this.id = id ?? uid();
   }
 }

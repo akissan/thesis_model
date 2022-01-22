@@ -1,14 +1,14 @@
-export const MAX_SIM_TIME = 500000;
+export const MAX_SIM_TIME = 50;
 
-export const INITIAL_UNIT_COUNT = 2;
-// export const BASE_REQUEST_RATE = 8;
-// export const REQUEST_BLUR = 7;
+export const INITIAL_UNIT_COUNT = 1;
+export const REQUEST_RATE = 8;
+export const REQUEST_BLUR = 10;
 
 // export const UNIT_SPAWN_RATE = {
 //   MIN_TICK: 0,
 //   MAX_TICK: 8,
 // };
-// export const PAGE_COUNT = 8;
+export const PAGE_COUNT = 8;
 // export const CACHE_SIZE = 10;
 // export const CACHE_STRATEGY = "RANDOM";[]
 

@@ -1,22 +1,21 @@
+import { GLOBALS } from "../globals";
+import { uid } from "../tools/utils";
 import Entity, { BaseEntityProps } from "./entity";
+import { PageID } from "./pages";
 import { ResponseState } from "./response";
 
-export type UnitID = Unit["id"];
+export class Unit extends Entity {
+  stage: ResponseState = "new";
+  pageID: PageID;
+  requiredBlockType: "handler" | "builder" | "exit" = "handler";
 
-export type UnitTable = Map<UnitID, Unit>;
-
-export default class Unit extends Entity {
-  state: ResponseState;
-
-  static table: UnitTable;
-  static setTable = (table: typeof Unit.table) => {
-    Unit.table = table;
-  };
-
-  constructor(props?: BaseEntityProps) {
-    super({ ...props });
-    this.state = "new";
-
-    Unit.table.set(this.id, this);
+  constructor({
+    id,
+    pageID,
+    globalManager,
+  }: BaseEntityProps & { pageID: Unit["pageID"] }) {
+    super({ id: id ?? `${uid()}`, globalManager });
+    this.pageID = pageID;
+    globalManager.tables.unitTable.set(this.id, this);
   }
 }

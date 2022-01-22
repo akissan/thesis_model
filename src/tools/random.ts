@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 import { writeFile } from "fs";
 
-const getRndNum = () =>
+export const getRndNum = () =>
   ((Math.random() +
     Math.random() +
     Math.random() +

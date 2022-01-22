@@ -1,12 +1,7 @@
 import { PROCESS_TIMES } from "../../parameters";
-import { pp } from "../../tools/prettyPrint";
-import { randomItem } from "../../tools/utils";
-import Block, { BaseBlockProps } from "../block";
-import Process from "../process";
-import Queue from "../queue";
-import { HandlerAcceptedResponseStates, ResponseState } from "../response";
-import Unit from "../unit";
-import { builderAcceptedResponseStates } from "./builder";
+import { Block } from "../block";
+import { Process } from "../process";
+import { Unit } from "../unit";
 
 export const handlerAcceptedResponseStates = [
   "new",
@@ -17,87 +12,53 @@ export const handlerAcceptedResponseStates = [
   "crafted",
 ] as const;
 
-export default class HandlerBlock extends Block {
-  allowedOperations = [...handlerAcceptedResponseStates];
-  outputQueue: { builderQueue: Queue; finishQueue: Queue };
+export class HandlerBlock extends Block {
+  blockType = "handler";
 
-  constructor(
-    props: BaseBlockProps & { outputQueue: HandlerBlock["outputQueue"] }
-  ) {
-    super(props);
-    this.outputQueue = props.outputQueue;
-  }
-
-  decideProcess = (unit: Unit): Process => {
-    const state = unit.state as HandlerAcceptedResponseStates;
-    const schedule = this.schedule;
-
-    switch (state) {
+  decideProcess: (unit: Unit) => Process = (unit) => {
+    switch (unit.stage) {
       case "new":
         return new Process({
-          name: "Connection",
-          timeLeft: PROCESS_TIMES.connection,
+          name: "connection",
+          time: PROCESS_TIMES.connection,
           unit,
-          parentBlock: this,
-          options: {
-            finish: {
-              state: "connected",
-            },
-          },
-          schedule,
+          nextStage: "connected",
+          nextBlock: "handler",
+          block: this,
         });
-      case "connected":
+      case "connected": {
+        // let isCached = Math.random() < 0.6;
+        let isCached = this.globalManager.cacheManager.isCached(unit.pageID);
         return new Process({
-          name: "Parsing",
-          timeLeft: PROCESS_TIMES.parsing,
+          name: "parsing",
+          time: PROCESS_TIMES.parsing,
           unit,
-          parentBlock: this,
-          options: {
-            finish: {
-              state: randomItem<ResponseState>(["cached", "not_cached"]),
-            },
-          },
-          schedule,
+          //   nextStage: isCached ? "cached" : "not_cached",
+          //   nextBlock: isCached ? "handler" : "builder",
+          nextStage: isCached ? "cached" : "not_cached",
+          nextBlock: isCached ? "handler" : "builder",
+          block: this,
         });
+      }
       case "cached":
         return new Process({
-          name: "Crafting",
-          timeLeft: PROCESS_TIMES.response_crafting,
+          name: "crafting",
+          time: PROCESS_TIMES.response_crafting,
           unit,
-          parentBlock: this,
-          options: {
-            finish: {
-              state: "crafted",
-            },
-          },
-          schedule,
+          nextStage: "crafted",
+          nextBlock: "handler",
+          block: this,
         });
       case "crafted":
         return new Process({
-          name: "Sending",
-          timeLeft: PROCESS_TIMES.sending,
+          name: "sending",
+          time: PROCESS_TIMES.sending,
           unit,
-          parentBlock: this,
-          options: {
-            finish: {
-              state: "sended",
-            },
-          },
-          schedule,
+          nextStage: "sended",
+          nextBlock: "exit",
+          block: this,
         });
     }
-    throw new Error("Process is not assigned correctly for " + unit);
-  };
-
-  decideTransfer = (unit: Unit) => {
-    const travelMap = {
-      builder: this.outputQueue.builderQueue,
-      finish: this.outputQueue.finishQueue,
-    };
-    if (builderAcceptedResponseStates.includes(unit.state as any))
-      return travelMap.builder;
-    if (unit.state === "sended") return travelMap.finish;
-
-    throw new Error("Builder cannot decide what to do with " + pp.unit(unit));
+    throw new Error("Handler block cant decide");
   };
 }

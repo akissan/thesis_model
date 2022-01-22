@@ -1,11 +1,7 @@
 import { PROCESS_TIMES } from "../../parameters";
-import { pp } from "../../tools/prettyPrint";
-import Block, { BaseBlockProps } from "../block";
-import Process from "../process";
-import Queue from "../queue";
-import { BuilderAcceptedResponseStates } from "../response";
-import Unit from "../unit";
-import { handlerAcceptedResponseStates } from "./handler";
+import { Block } from "../block";
+import { Process } from "../process";
+import { Unit } from "../unit";
 
 export const builderAcceptedResponseStates = [
   "not_cached",
@@ -14,89 +10,51 @@ export const builderAcceptedResponseStates = [
   "builded",
 ] as const;
 
-export default class BuilderBlock extends Block {
-  allowedOperations = [...builderAcceptedResponseStates];
-  outputQueue: { handlerQueue: Queue };
+export class BuilderBlock extends Block {
+  blockType = "builder";
 
-  constructor(
-    props: BaseBlockProps & { outputQueue: BuilderBlock["outputQueue"] }
-  ) {
-    super(props);
-    this.outputQueue = props.outputQueue;
-  }
-
-  decideProcess = (unit: Unit): Process => {
-    const state = unit.state as BuilderAcceptedResponseStates;
-    const schedule = this.schedule;
-
-    if (state === "not_cached") {
-      return new Process({
-        name: "Prebuilding",
-        timeLeft: PROCESS_TIMES.building_start,
-        unit,
-        parentBlock: this,
-        options: {
-          finish: {
-            state: "prebuilded",
-          },
-        },
-        schedule,
-      });
+  decideProcess: (unit: Unit) => Process = (unit) => {
+    switch (unit.stage) {
+      case "not_cached":
+        return new Process({
+          name: "prebuilding",
+          time: PROCESS_TIMES.building_start,
+          unit,
+          nextBlock: "builder",
+          nextStage: "prebuilded",
+          block: this,
+        });
+      case "prebuilded":
+        return new Process({
+          name: "hydration",
+          time: PROCESS_TIMES.api_call,
+          unit,
+          nextBlock: "builder",
+          nextStage: "hydrated",
+          block: this,
+          //   blockOccupe: false,
+        });
+      case "hydrated":
+        return new Process({
+          name: "building",
+          time: PROCESS_TIMES.building_end,
+          unit,
+          nextBlock: "builder",
+          nextStage: "builded",
+          block: this,
+        });
+      case "builded":
+        return new Process({
+          name: "caching",
+          time: PROCESS_TIMES.writing_to_cache,
+          unit,
+          nextBlock: "handler",
+          nextStage: "cached",
+          block: this,
+          onFinish: () =>
+            this.globalManager.cacheManager.setCached(unit.pageID),
+        });
     }
-
-    if (state === "prebuilded") {
-      return new Process({
-        name: "Hydration",
-        timeLeft: PROCESS_TIMES.api_call,
-        unit,
-        options: {
-          finish: {
-            state: "hydrated",
-          },
-        },
-        onFinish: (process) => {
-          this.inputQueue.push(process.unit);
-        },
-        schedule,
-      });
-    }
-
-    if (state === "hydrated") {
-      return new Process({
-        name: "Building",
-        timeLeft: PROCESS_TIMES.building_end,
-        unit,
-        parentBlock: this,
-        options: {
-          finish: {
-            state: "builded",
-          },
-        },
-        schedule,
-      });
-    }
-
-    if (state === "builded") {
-      return new Process({
-        name: "Caching",
-        timeLeft: PROCESS_TIMES.writing_to_cache,
-        unit,
-        parentBlock: this,
-        options: {
-          finish: {
-            state: "cached",
-          },
-        },
-        schedule,
-      });
-    }
-    throw new Error("Process is not assigned correctly for " + unit);
-  };
-
-  decideTransfer = (unit: Unit) => {
-    if (handlerAcceptedResponseStates.includes(unit.state as any)) {
-      return this.outputQueue.handlerQueue;
-    }
-    throw new Error("Builder cannot decide what to do with " + pp.unit(unit));
+    throw new Error("Builder block cant deicde");
   };
 }

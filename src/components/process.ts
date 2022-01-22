@@ -1,86 +1,63 @@
-import { Statserver } from "../statserver";
-import { ProcessTable } from "../types/tables";
-import Block from "./block";
-import Entity, { BaseEntityProps } from "./entity";
-import { ResponseState } from "./response";
-import { Schedule } from "./schedule";
-import Unit from "./unit";
+import { GLOBALS } from "../globals";
+import { uid } from "../tools/utils";
+import { Block } from "./block";
+import { Unit } from "./unit";
 
-export type ProcessID = Process["id"];
-
-type BaseProcessProps = BaseEntityProps & {
-  timeLeft: Process["timeLeft"];
-  unit: Process["unit"];
-  name: Process["name"];
-  parentBlock?: Process["parentBlock"];
-};
-export default class Process extends Entity {
-  // id: ProcessID;
-  timeLeft: number;
-  totalTime: number;
-  status: "processing" | "finished";
-  onFinish?: (process: Process) => void;
-  parentBlock?: Block;
-  unit: Unit;
+export class Process {
+  id: string;
   name: string;
-  options?: {
-    finish?: {
-      state?: ResponseState;
-    };
-  };
+  time: number;
+  onFinish: (() => void) | undefined;
+  unit: Unit;
+  block: Block;
+  //   globalManager: GlobalManager;
+  blockOccupe: boolean = true;
 
-  static table: ProcessTable;
-  static setTable = (table: typeof Process.table) => {
-    Process.table = table;
+  nextStage: Unit["stage"];
+  nextBlock: Unit["requiredBlockType"];
+
+  finish = () => {
+    GLOBALS.VERBOSE && console.log(this.id, "finishing");
+    this.onFinish?.();
+
+    this.unit.stage = this.nextStage;
+    this.unit.requiredBlockType = this.nextBlock;
+
+    this.block.handle(this.unit);
+    GLOBALS.VERBOSE && console.log(this.id, "finished");
   };
 
   constructor({
-    timeLeft,
-    onFinish,
-    unit,
     name,
-    parentBlock,
-    options,
-    id,
-    schedule,
-  }: BaseProcessProps & {
+    time,
+    onFinish,
+    nextStage,
+    nextBlock,
+    unit,
+    block,
+    blockOccupe,
+  }: {
+    name: Process["name"];
+    time: Process["time"];
     onFinish?: Process["onFinish"];
-    options?: Process["options"];
-    schedule: Schedule;
+    nextStage: Process["nextStage"];
+    nextBlock: Process["nextBlock"];
+    unit: Process["unit"];
+    block: Process["block"];
+    blockOccupe?: Process["blockOccupe"];
   }) {
-    super({ id });
-    this.status = "processing";
-    this.timeLeft = timeLeft;
-    this.onFinish = onFinish;
-    this.unit = unit;
     this.name = name;
-    this.parentBlock = parentBlock;
-    this.options = options;
-    this.totalTime = timeLeft;
+    this.time = time;
+    // this.id = uid();
+    this.id = `${name}_${unit.id}_${block.id}_${uid()}`;
+    this.onFinish = onFinish;
 
-    Process.table.set(this.id, this);
-    Statserver.reportProcessChange({ processID: this.id, unitID: unit.id });
-    schedule.pushProcess(this);
+    this.nextBlock = nextBlock;
+    this.nextStage = nextStage;
+
+    this.unit = unit;
+    this.block = block;
+
+    if (typeof blockOccupe === "boolean") this.blockOccupe = blockOccupe;
   }
-
-  baseFinish = (process: Process) => {
-    if (this.options?.finish?.state) {
-      process.unit.state = this.options.finish.state;
-    }
-    process.parentBlock?.onProcessFinish(process);
-  };
-
-  finishProcess = () => {
-    this.timeLeft = 0;
-    this.status = "finished";
-    this.onFinish?.(this);
-    this.baseFinish(this);
-  };
-
-  step = () => {
-    if (this.status === "processing") {
-      this.timeLeft--;
-      if (this.timeLeft <= 0) this.finishProcess();
-    }
-  };
 }

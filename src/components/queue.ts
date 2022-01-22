@@ -1,66 +1,47 @@
-import { Statserver } from "../statserver";
-import { uid } from "../tools/utils";
-import Block, { BlockID } from "./block";
-import Entity from "./entity";
-import Unit from "./unit";
+import { GLOBALS } from "../globals";
+import { Block } from "./block";
+import { Unit } from "./unit";
 
-export type QueueProps = {
-  list?: Unit[];
-  options?: {
-    onPush?: Queue["onPush"];
-    id?: Queue["id"];
-  };
-};
+export class Queue {
+  id: string;
+  blocks: Block[] = [];
+  units: Unit[] = [];
+  blockType: Unit["requiredBlockType"];
 
-export type QueueID = Queue["id"];
+  constructor({
+    id,
+    blockType,
+  }: {
+    id: Queue["id"];
+    blockType: Queue["blockType"];
+  }) {
+    this.id = id;
+    this.blockType = blockType;
+  }
 
-export type consumerStates = "available" | "busy";
-
-export default class Queue extends Array {
-  onPush?: (unit: Unit) => void;
-  id: Entity["id"];
-  consumers: Map<BlockID, consumerStates> = new Map();
-
-  setConsumerState = (id: BlockID, state: consumerStates) => {
-    this.consumers.set(id, state);
-    if (state === "available") this.onAvailableConsumer(id);
+  findAvailableBlock = () => {
+    const freeBlock = this.blocks.find((block) => block.status === "idle");
+    return freeBlock;
   };
 
-  addNewConsumer = (id: BlockID) => {
-    this.consumers.set(id, "available");
-  };
-
-  onAvailableConsumer = (id: BlockID) => {
-    Block.table.get(id)?.tryQueue();
+  onBlockFreed = (b: Block) => {
+    GLOBALS.VERBOSE &&
+      console.log(`${b.id} freed, so ${this.id} is looking for unit`);
+    const unit = this.units.shift();
+    if (unit) b.handle(unit);
+    GLOBALS.VERBOSE &&
+      console.log(`${this.id} found and assigned ${unit?.id} to ${b.id}`);
   };
 
   push = (unit: Unit) => {
-    super.push(unit);
-    Statserver.reportTravel({ unitID: unit.id, entityID: this.id });
-    this.onPush?.(unit);
-
-    this.getConsumer()?.tryQueue();
-
-    return this.length;
-  };
-
-  getConsumer = () => {
-    for (const [blockID, blockState] of this.consumers) {
-      if (blockState === "available") {
-        return Block.table.get(blockID);
-      }
+    const freeBlock = this.findAvailableBlock();
+    if (freeBlock) {
+      GLOBALS.VERBOSE &&
+        console.log(unit.id, "redirected to", freeBlock.id, "by", this.id);
+      freeBlock.handle(unit);
+    } else {
+      GLOBALS.VERBOSE && console.log(unit.id, "pushed to ", this.id);
+      this.units.push(unit);
     }
   };
-
-  constructor(
-    { list = [], options: { onPush, id } = {} }: QueueProps = {
-      list: [],
-      options: {},
-    }
-  ) {
-    super();
-    super.push(...list);
-    this.onPush = onPush;
-    this.id = id ?? uid();
-  }
 }

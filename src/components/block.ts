@@ -1,118 +1,62 @@
-import chalk from "chalk";
-import { Statserver } from "../statserver";
-import { pp } from "../tools/prettyPrint";
-import { clog } from "../tools/utils";
-import { BlockTable } from "../types/tables";
+import { uid } from "../tools/utils";
 import Entity, { BaseEntityProps } from "./entity";
-import Process from "./process";
-import Queue from "./queue";
-import { ResponseState } from "./response";
+import { GlobalManager } from "./globalManager";
+import { Process } from "./process";
+import { Queue } from "./queue";
 import { Schedule } from "./schedule";
-import Unit from "./unit";
+import { Unit } from "./unit";
 
-export type BaseBlockProps = BaseEntityProps & {
-  name: Block["name"];
-  inputQueue: Block["inputQueue"];
-  outputQueue: Block["outputQueue"];
-  schedule: Block["schedule"];
-};
-
-export type BlockID = Block["id"];
-
-export default abstract class Block extends Entity {
-  name: string;
-  private _process?: Process;
-  status: "processing" | "idle";
-  inputQueue: Queue;
-  outputQueue: Record<string, Queue> | Queue;
-  abstract allowedOperations: ResponseState[];
-  abstract decideProcess: (unit: Unit) => Process;
-  abstract decideTransfer: (unit: Unit) => Queue | undefined;
+export abstract class Block extends Entity {
+  blockType: string = "base";
+  status: "busy" | "idle" = "idle";
+  currentProcess: Process["id"] | undefined = undefined;
   schedule: Schedule;
+  queue: Queue;
 
-  static table: BlockTable;
-  static setTable = (table: typeof Block.table) => {
-    Block.table = table;
-  };
+  abstract decideProcess: (unit: Unit) => Process;
 
-  constructor({ name, inputQueue, outputQueue, id, schedule }: BaseBlockProps) {
-    super({ id });
-    this.name = name;
-    this.status = "idle";
-    this.inputQueue = inputQueue;
-    this.outputQueue = outputQueue;
-    this.schedule = schedule;
-
-    Block.table.set(this.id, this);
-    this.inputQueue.addNewConsumer(this.id);
-  }
-
-  tryQueue = () => {
-    this.checkQueue(this.inputQueue);
-  };
-
-  step = () => {
-    if (this.status === "idle") {
-      this.checkQueue(this.inputQueue);
+  handle = (unit: Unit) => {
+    if (unit.requiredBlockType == this.blockType) {
+      this.assignProcess(unit);
+      return;
     }
-  };
 
-  checkQueue = (queue: Queue) => {
-    const unit = queue.shift();
-    if (!unit) return;
-    if (global.VERBOSE)
-      clog(
-        chalk.white(
-          `[Q] Block ${chalk.yellow(this.id)} got a ${chalk.green(
-            unit.id
-          )} from queue`
-        )
-      );
-    this.setProcess(this.decideProcess(unit));
-  };
-
-  onProcessFinish = (process: Process) => {
-    this.process = undefined;
-    this.assignProcess(process.unit);
-    // this.postFinish();
-  };
-
-  shouldStay = (unit: Unit) => this.allowedOperations.includes(unit.state);
-
-  get process(): Block["_process"] {
-    return this._process;
-  }
-  set process(p: Block["_process"]) {
-    this._process = p;
-    if (p) {
-      Statserver.reportTravel({ unitID: p.unit.id, entityID: this.id });
-    }
-    this.status = p === undefined ? "idle" : "processing";
-
-    if (this.status === "idle") {
-      this.inputQueue.setConsumerState(this.id, "available");
+    if (unit.requiredBlockType === "exit") {
+      this.globalManager.finishedUnits.push(unit);
     } else {
-      this.inputQueue.setConsumerState(this.id, "busy");
+      const queue = this.globalManager.findQueueForType(unit.requiredBlockType);
+      queue.push(unit);
     }
-  }
-
-  setProcess = (process: Process) => {
-    if (process?.parentBlock === this) {
-      this.process = process;
-    }
+    this.free();
   };
 
   assignProcess = (unit: Unit) => {
-    if (this.shouldStay(unit)) {
-      this.setProcess(this.decideProcess(unit));
-    } else {
-      this.transferSomewhere(unit);
-    }
+    const p = this.decideProcess(unit);
+    this.status = "busy";
+    this.currentProcess = p.id;
+    this.schedule.addNewProcess(p);
   };
 
-  transferSomewhere = (unit: Unit) => {
-    if (global.VERBOSE)
-      clog(chalk.white("Where should i transfer " + pp.unit(unit) + "?"));
-    this.decideTransfer(unit)?.push(unit);
+  free = () => {
+    this.status = "idle";
+    this.currentProcess = undefined;
+    this.queue.onBlockFreed(this);
   };
+
+  constructor({
+    id,
+    schedule,
+    globalManager,
+    queue,
+  }: BaseEntityProps & {
+    schedule: Block["schedule"];
+    queue: Block["queue"];
+  }) {
+    super({ id: id ?? `B${uid()}`, globalManager });
+    this.schedule = schedule;
+    this.queue = queue;
+
+    this.queue.blocks.push(this);
+    this.globalManager.tables.blockTable.set(this.id, this);
+  }
 }
