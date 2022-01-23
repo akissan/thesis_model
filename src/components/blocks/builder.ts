@@ -23,6 +23,7 @@ export class BuilderBlock extends Block {
           nextBlock: "builder",
           nextStage: "prebuilded",
           block: this,
+          globalManager: this.globalManager,
         });
       case "prebuilded":
         return new Process({
@@ -32,6 +33,7 @@ export class BuilderBlock extends Block {
           nextBlock: "builder",
           nextStage: "hydrated",
           block: this,
+          globalManager: this.globalManager,
           //   blockOccupe: false,
         });
       case "hydrated":
@@ -41,12 +43,14 @@ export class BuilderBlock extends Block {
           unit,
           nextBlock: "builder",
           nextStage: "builded",
+          globalManager: this.globalManager,
           block: this,
         });
       case "builded":
         return new Process({
           name: "caching",
           time: PROCESS_TIMES.writing_to_cache,
+          globalManager: this.globalManager,
           unit,
           nextBlock: "handler",
           nextStage: "cached",

@@ -4,6 +4,8 @@ import Entity, { BaseEntityProps } from "./entity";
 import { PageID } from "./pages";
 import { ResponseState } from "./response";
 
+export type UnitID = Unit["id"];
+
 export class Unit extends Entity {
   stage: ResponseState = "new";
   pageID: PageID;
@@ -17,5 +19,6 @@ export class Unit extends Entity {
     super({ id: id ?? `${uid()}`, globalManager });
     this.pageID = pageID;
     globalManager.tables.unitTable.set(this.id, this);
+    globalManager.statManager.logUnitCreation(this);
   }
 }

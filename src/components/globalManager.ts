@@ -15,6 +15,11 @@ export class GlobalManager {
   cacheManager: CacheManager;
   statManager: StatManager;
 
+  finishUnit = (unit: Unit) => {
+    this.statManager.logUnitExit(unit);
+    this.finishedUnits.push(unit);
+  };
+
   findQueueForType = (reqType: Exclude<Unit["requiredBlockType"], "exit">) => {
     const queue = this.queues.get(reqType);
     if (!queue) throw new Error(`Queue for blockType ${reqType} was not found`);

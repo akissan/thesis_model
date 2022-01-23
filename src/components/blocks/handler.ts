@@ -25,6 +25,7 @@ export class HandlerBlock extends Block {
           nextStage: "connected",
           nextBlock: "handler",
           block: this,
+          globalManager: this.globalManager,
         });
       case "connected": {
         // let isCached = Math.random() < 0.6;
@@ -38,6 +39,7 @@ export class HandlerBlock extends Block {
           nextStage: isCached ? "cached" : "not_cached",
           nextBlock: isCached ? "handler" : "builder",
           block: this,
+          globalManager: this.globalManager,
         });
       }
       case "cached":
@@ -48,6 +50,7 @@ export class HandlerBlock extends Block {
           nextStage: "crafted",
           nextBlock: "handler",
           block: this,
+          globalManager: this.globalManager,
         });
       case "crafted":
         return new Process({
@@ -57,6 +60,7 @@ export class HandlerBlock extends Block {
           nextStage: "sended",
           nextBlock: "exit",
           block: this,
+          globalManager: this.globalManager,
         });
     }
     throw new Error("Handler block cant decide");

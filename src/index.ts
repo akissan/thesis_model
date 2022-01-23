@@ -26,9 +26,11 @@ const main = (SIM_OPTIONS: SIM_OPTIONS) => {
   const handlerQueue = new Queue({ id: "H_QUEUE", blockType: "handler" });
   const builderQueue = new Queue({ id: "B_QUEUE", blockType: "builder" });
 
-  const cacheManager = new CacheManager({ cacheSize: 2 });
+  const cacheManager = new CacheManager({ cacheSize: 4 });
 
   const statManager = new StatManager();
+
+  cacheManager.statManager = statManager;
 
   const globalManager = new GlobalManager({
     queues: [handlerQueue, builderQueue],
@@ -65,6 +67,9 @@ const main = (SIM_OPTIONS: SIM_OPTIONS) => {
   });
 
   while (schedule.currentTime < MAX_SIM_TIME) schedule.step();
+
+  statManager.logSimEnd(schedule.currentTime);
+  statManager.logStats();
   return schedule.currentTime;
 };
 

@@ -1,4 +1,4 @@
-export const MAX_SIM_TIME = 50;
+export const MAX_SIM_TIME = 100;
 
 export const INITIAL_UNIT_COUNT = 1;
 export const REQUEST_RATE = 8;

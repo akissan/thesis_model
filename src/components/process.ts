@@ -1,10 +1,12 @@
 import { GLOBALS } from "../globals";
 import { uid } from "../tools/utils";
 import { Block } from "./block";
+import Entity, { BaseEntityProps } from "./entity";
 import { Unit } from "./unit";
 
-export class Process {
-  id: string;
+export type ProcessID = Process["id"];
+
+export class Process extends Entity {
   name: string;
   time: number;
   onFinish: (() => void) | undefined;
@@ -36,7 +38,8 @@ export class Process {
     unit,
     block,
     blockOccupe,
-  }: {
+    globalManager,
+  }: BaseEntityProps & {
     name: Process["name"];
     time: Process["time"];
     onFinish?: Process["onFinish"];
@@ -46,10 +49,12 @@ export class Process {
     block: Process["block"];
     blockOccupe?: Process["blockOccupe"];
   }) {
+    super({
+      id: `${name}_${unit.id}_${block.id}_${uid()}`,
+      globalManager,
+    });
     this.name = name;
     this.time = time;
-    // this.id = uid();
-    this.id = `${name}_${unit.id}_${block.id}_${uid()}`;
     this.onFinish = onFinish;
 
     this.nextBlock = nextBlock;

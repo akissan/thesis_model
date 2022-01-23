@@ -1,6 +1,6 @@
 const GLOBALS = {
   VERBOSE: false,
 };
-GLOBALS.VERBOSE = true;
+// GLOBALS.VERBOSE = true;
 
 export { GLOBALS };

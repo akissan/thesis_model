@@ -6,6 +6,8 @@ import { Queue } from "./queue";
 import { Schedule } from "./schedule";
 import { Unit } from "./unit";
 
+export type BlockID = Block["id"];
+
 export abstract class Block extends Entity {
   blockType: string = "base";
   status: "busy" | "idle" = "idle";
@@ -22,7 +24,8 @@ export abstract class Block extends Entity {
     }
 
     if (unit.requiredBlockType === "exit") {
-      this.globalManager.finishedUnits.push(unit);
+      // this.globalManager.finishedUnits.push(unit);
+      this.globalManager.finishUnit(unit);
     } else {
       const queue = this.globalManager.findQueueForType(unit.requiredBlockType);
       queue.push(unit);

@@ -21,6 +21,7 @@ export class Schedule {
   }) {
     this.unitGenerator = unitGenerator;
     this.statManager = statManager;
+    this.statManager.schedule = this;
   }
 
   addTick = (tick: number) => {
